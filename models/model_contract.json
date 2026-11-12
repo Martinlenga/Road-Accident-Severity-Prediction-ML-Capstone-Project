@@ -1,0 +1,391 @@
+{
+  "model_file": "stats19_severity_model.joblib",
+  "selection_policy": "Qualitative comparison of the five requested models using their stratified-CV Macro-F1, balanced accuracy, Serious/Fatal precision and recall, runtime, and recorded warnings. The order is justified by the displayed merits and demerits; no mean metric score or mean merit rank is calculated.",
+  "cv_comparison_position": 1,
+  "target": "severity_label",
+  "classes": [
+    "Fatal",
+    "Serious",
+    "Slight"
+  ],
+  "features": [
+    {
+      "feature": "road_type",
+      "dtype": "categorical",
+      "default": "6",
+      "category_examples": [
+        "6",
+        "3",
+        "1",
+        "9",
+        "2",
+        "7"
+      ]
+    },
+    {
+      "feature": "speed_limit",
+      "dtype": "numeric",
+      "default": 30.0,
+      "category_examples": []
+    },
+    {
+      "feature": "junction_detail",
+      "dtype": "categorical",
+      "default": "0",
+      "category_examples": [
+        "0",
+        "13",
+        "16",
+        "19",
+        "-1",
+        "18",
+        "17",
+        "99"
+      ]
+    },
+    {
+      "feature": "junction_control",
+      "dtype": "categorical",
+      "default": "4",
+      "category_examples": [
+        "4",
+        "-1",
+        "2",
+        "9",
+        "3",
+        "1"
+      ]
+    },
+    {
+      "feature": "light_conditions",
+      "dtype": "categorical",
+      "default": "1",
+      "category_examples": [
+        "1",
+        "4",
+        "6",
+        "7",
+        "5",
+        "-1"
+      ]
+    },
+    {
+      "feature": "weather_conditions",
+      "dtype": "categorical",
+      "default": "1",
+      "category_examples": [
+        "1",
+        "2",
+        "8",
+        "9",
+        "5",
+        "4",
+        "7",
+        "3",
+        "6",
+        "-1"
+      ]
+    },
+    {
+      "feature": "road_surface_conditions",
+      "dtype": "categorical",
+      "default": "1",
+      "category_examples": [
+        "1",
+        "2",
+        "9",
+        "4",
+        "-1",
+        "3",
+        "5"
+      ]
+    },
+    {
+      "feature": "special_conditions_at_site",
+      "dtype": "categorical",
+      "default": "0",
+      "category_examples": [
+        "0",
+        "-1",
+        "9",
+        "4",
+        "1",
+        "5",
+        "7",
+        "3",
+        "6",
+        "2"
+      ]
+    },
+    {
+      "feature": "carriageway_hazards",
+      "dtype": "categorical",
+      "default": "0",
+      "category_examples": [
+        "0",
+        "-1",
+        "99",
+        "13",
+        "17",
+        "11",
+        "21",
+        "20",
+        "15",
+        "19",
+        "16",
+        "12",
+        "18",
+        "14"
+      ]
+    },
+    {
+      "feature": "urban_or_rural_area",
+      "dtype": "categorical",
+      "default": "1",
+      "category_examples": [
+        "1",
+        "2",
+        "3",
+        "-1"
+      ]
+    },
+    {
+      "feature": "trunk_road_flag",
+      "dtype": "categorical",
+      "default": "2",
+      "category_examples": [
+        "2",
+        "-1",
+        "1"
+      ]
+    },
+    {
+      "feature": "first_road_class",
+      "dtype": "categorical",
+      "default": "3",
+      "category_examples": [
+        "3",
+        "6",
+        "4",
+        "5",
+        "1",
+        "2",
+        "-1"
+      ]
+    },
+    {
+      "feature": "second_road_class",
+      "dtype": "categorical",
+      "default": "6",
+      "category_examples": [
+        "6",
+        "0",
+        "3",
+        "4",
+        "5",
+        "-1",
+        "1",
+        "2",
+        "9"
+      ]
+    },
+    {
+      "feature": "day_of_week",
+      "dtype": "categorical",
+      "default": "6",
+      "category_examples": [
+        "6",
+        "5",
+        "4",
+        "3",
+        "7",
+        "2",
+        "1"
+      ]
+    },
+    {
+      "feature": "month",
+      "dtype": "categorical",
+      "default": "6",
+      "category_examples": [
+        "6",
+        "11",
+        "10",
+        "5",
+        "7",
+        "9",
+        "8",
+        "12",
+        "3",
+        "4",
+        "1",
+        "2"
+      ]
+    },
+    {
+      "feature": "hour",
+      "dtype": "numeric",
+      "default": 15.0,
+      "category_examples": []
+    },
+    {
+      "feature": "time_band",
+      "dtype": "categorical",
+      "default": "Daytime",
+      "category_examples": [
+        "Daytime",
+        "Evening peak",
+        "Morning peak",
+        "Late evening",
+        "Night"
+      ]
+    },
+    {
+      "feature": "weekend_flag",
+      "dtype": "numeric",
+      "default": 0.0,
+      "category_examples": []
+    },
+    {
+      "feature": "number_of_vehicles",
+      "dtype": "numeric",
+      "default": 2.0,
+      "category_examples": []
+    },
+    {
+      "feature": "driver_age_mean",
+      "dtype": "numeric",
+      "default": 39.0,
+      "category_examples": []
+    },
+    {
+      "feature": "driver_age_min",
+      "dtype": "numeric",
+      "default": 32.0,
+      "category_examples": []
+    },
+    {
+      "feature": "vehicle_age_mean",
+      "dtype": "numeric",
+      "default": 8.0,
+      "category_examples": []
+    },
+    {
+      "feature": "engine_cc_mean",
+      "dtype": "numeric",
+      "default": 1570.5,
+      "category_examples": []
+    },
+    {
+      "feature": "vehicle_type_first",
+      "dtype": "categorical",
+      "default": "9",
+      "category_examples": [
+        "9",
+        "19",
+        "3",
+        "1",
+        "5",
+        "11",
+        "8",
+        "21",
+        "4",
+        "2",
+        "33",
+        "90",
+        "20",
+        "97",
+        "98",
+        "17",
+        "10",
+        "23",
+        "22",
+        "-1",
+        "99",
+        "16",
+        "18"
+      ]
+    },
+    {
+      "feature": "driver_sex_first",
+      "dtype": "categorical",
+      "default": "1",
+      "category_examples": [
+        "1",
+        "2",
+        "3",
+        "-1"
+      ]
+    },
+    {
+      "feature": "vehicle_manoeuvre_first",
+      "dtype": "categorical",
+      "default": "19",
+      "category_examples": [
+        "19",
+        "9",
+        "99",
+        "5",
+        "4",
+        "7",
+        "3",
+        "2",
+        "-1",
+        "13",
+        "1",
+        "10",
+        "14",
+        "12",
+        "11",
+        "6",
+        "15",
+        "8",
+        "20"
+      ]
+    },
+    {
+      "feature": "vehicle_records_count",
+      "dtype": "numeric",
+      "default": 2.0,
+      "category_examples": []
+    },
+    {
+      "feature": "vehicle_age_max",
+      "dtype": "numeric",
+      "default": 10.0,
+      "category_examples": []
+    },
+    {
+      "feature": "motorcycle_involved",
+      "dtype": "numeric",
+      "default": 0.0,
+      "category_examples": []
+    },
+    {
+      "feature": "goods_vehicle_involved",
+      "dtype": "numeric",
+      "default": 0.0,
+      "category_examples": []
+    },
+    {
+      "feature": "vulnerable_road_user_count",
+      "dtype": "numeric",
+      "default": 0.0,
+      "category_examples": []
+    },
+    {
+      "feature": "vulnerable_road_user_involved",
+      "dtype": "numeric",
+      "default": 0.0,
+      "category_examples": []
+    }
+  ],
+  "decision_multipliers": {
+    "Slight": 1.0,
+    "Serious": 1.0,
+    "Fatal": 1.0
+  },
+  "prediction_rule": "argmax(class_probability * class_multiplier)",
+  "scope_warning": "Predicts severity conditional on a recorded personal-injury collision. It does not predict whether a collision will occur.",
+  "operational_warning": "Further model improvement recommended"
+}
