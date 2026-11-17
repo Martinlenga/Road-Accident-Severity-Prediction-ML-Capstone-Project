@@ -957,10 +957,14 @@ def monthly_counts(df):
 
 
 def year_span(years) -> str:
-    years = sorted(int(y) for y in years)
+    years = sorted({int(y) for y in years})
     if not years:
         return "no years"
-    return str(years[0]) if years[0] == years[-1] else f"{years[0]}–{years[-1]}"
+    if years[0] == years[-1]:
+        return str(years[0])
+    if years == list(range(years[0], years[-1] + 1)):
+        return f"{years[0]}–{years[-1]}"
+    return ", ".join(str(y) for y in years)  # non-consecutive selection, e.g. "2023, 2025"
 
 
 # =============================================================================
@@ -1005,14 +1009,47 @@ FILTERS = {
     "filter_road": road_options,
     "filter_speed": speed_options,
 }
+ALL_OPTION = "All"  # first entry of every filter dropdown
+
+
+def _remember_filter(key: str, value: list):
+    st.session_state[key] = value
+    st.session_state[f"{key}__previous"] = value
+
+
 for _key, _options in FILTERS.items():
-    _current = st.session_state.get(_key)
-    st.session_state[_key] = list(_options) if _current is None else [v for v in _current if v in _options]
+    _current = st.session_state.get(_key) or []
+    _remember_filter(_key, [v for v in _current if v == ALL_OPTION or v in _options] or [ALL_OPTION])
+
+
+def sync_filter(key: str, options: list):
+    """Keep "All" and specific choices mutually exclusive in a filter dropdown.
+
+    Picking "All" clears specific choices; picking a specific value removes "All";
+    clearing everything, or picking every value, returns to "All".
+    """
+    current = list(st.session_state.get(key) or [])
+    previous = st.session_state.get(f"{key}__previous", [ALL_OPTION])
+    if not current or (ALL_OPTION in current and ALL_OPTION not in previous):
+        current = [ALL_OPTION]
+    elif ALL_OPTION in current:
+        current = [v for v in current if v != ALL_OPTION]
+    if set(current) == set(options):
+        current = [ALL_OPTION]
+    _remember_filter(key, current)
+
+
+def filter_dropdown(label: str, key: str, options: list, all_label: str) -> list:
+    return st.multiselect(
+        label, [ALL_OPTION, *options], key=key, placeholder="Choose an option",
+        format_func=lambda value: all_label if value == ALL_OPTION else str(value),
+        on_change=sync_filter, args=(key, options),
+    )
 
 
 def reset_global_filters():
-    for key, options in FILTERS.items():
-        st.session_state[key] = list(options)
+    for key in FILTERS:
+        _remember_filter(key, [ALL_OPTION])
 
 
 with st.sidebar:
@@ -1031,25 +1068,17 @@ with st.sidebar:
     st.markdown("<div class='section-kicker'>Refine the data</div>", unsafe_allow_html=True)
     st.button("↺  Reset all filters", on_click=reset_global_filters, **stretch(st.button))
     with st.expander("Time period & outcome", expanded=True):
-        selected_years = st.multiselect("Collision year", ALL_YEARS, key="filter_years", placeholder="All years")
-        selected_severity = st.multiselect("Collision severity", severity_options, key="filter_severity",
-                                           placeholder="All severity levels")
+        selected_years = filter_dropdown("Collision year", "filter_years", ALL_YEARS, "All years")
+        selected_severity = filter_dropdown("Collision severity", "filter_severity", severity_options,
+                                            "All severity levels")
     with st.expander("Road context", expanded=False):
-        selected_areas = st.multiselect("Area type", area_options, key="filter_area", placeholder="All area types")
-        selected_roads = st.multiselect("Road type", road_options, key="filter_road", placeholder="All road types")
-        selected_speeds = st.multiselect("Speed limit (mph)", speed_options, key="filter_speed",
-                                         placeholder="All speed limits")
-    st.markdown(
-        f"<div class='filter-caption'>All {len(ALL_YEARS)} years in the data folder are loaded "
-        f"({year_span(ALL_YEARS)}). An empty filter means “all”. Filters apply to the Overview, "
-        f"Collision Analytics, Road Users and Collision Explorer pages; Statistical Evidence and "
-        f"Model Insights show the notebook's results for the full dataset.</div>",
-        unsafe_allow_html=True,
-    )
+        selected_areas = filter_dropdown("Area type", "filter_area", area_options, "All area types")
+        selected_roads = filter_dropdown("Road type", "filter_road", road_options, "All road types")
+        selected_speeds = filter_dropdown("Speed limit (mph)", "filter_speed", speed_options, "All speed limits")
 
 
 def apply_filters(frame: pd.DataFrame) -> pd.DataFrame:
-    """Apply the sidebar filters. An empty selection means no restriction."""
+    """Apply the sidebar filters. "All" (or no choice) means no restriction."""
     mask = np.ones(len(frame), dtype=bool)
     for column, chosen, options in [
         ("year", selected_years, ALL_YEARS),
@@ -1058,6 +1087,7 @@ def apply_filters(frame: pd.DataFrame) -> pd.DataFrame:
         ("road_type_label", selected_roads, road_options),
         ("speed_label", selected_speeds, speed_options),
     ]:
+        chosen = [v for v in chosen if v != ALL_OPTION]
         if chosen and set(chosen) != set(options):
             mask &= frame[column].isin(chosen).to_numpy(dtype=bool, na_value=False)
     return frame if mask.all() else frame[mask]
