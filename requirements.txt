@@ -1,0 +1,9 @@
+streamlit>=1.40
+pandas>=2.0
+numpy>=1.26
+altair>=5.0
+joblib>=1.3
+# The saved pipeline (models/stats19_severity_model.joblib) was fitted with
+# scikit-learn 1.7.2 in STATS19_Capstone_Rich_CRISPDM_V6.ipynb; keep the same
+# version so the pickled model loads and behaves identically.
+scikit-learn==1.7.2
