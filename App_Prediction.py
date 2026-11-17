@@ -319,12 +319,6 @@ HYPOTHESIS_COLOURS = {
     "H4 Casualty": TEAL,
 }
 
-RESEARCH_ONLY_NOTICE = (
-    "RESEARCH / DEMONSTRATION ONLY — this model has not passed the project's "
-    "acceptance gate. Do not use its predictions for operational road-safety, "
-    "emergency response, enforcement, insurance or individual decisions."
-)
-
 st.markdown(
     f"""
     <style>
@@ -1213,7 +1207,9 @@ def render_overview():
                 geo = geo.sample(5000, random_state=42)
             geo = plain(geo).assign(color=lambda d: d["severity_label"].map(SEVERITY_COLOURS).fillna(BLUE))
             geo["order"] = geo["severity_label"].map({"Slight": 0, "Serious": 1, "Fatal": 2})
-            geo = geo.sort_values("order")
+            # Coordinates are stored as float32 to save memory; st.map serialises
+            # its default view with json, which rejects numpy float32 values.
+            geo = geo.sort_values("order").astype({"latitude": "float64", "longitude": "float64"})
             st.map(geo, latitude="latitude", longitude="longitude", color="color", size=60)
             st.caption("Colour = severity: green Slight, amber Serious, red Fatal. Coordinates are for description "
                        "only and are not model inputs (notebook Section 4.9).")
@@ -1472,7 +1468,7 @@ PREDICTION_GROUPS = [
         "light_conditions", "weather_conditions", "road_surface_conditions",
         "special_conditions_at_site", "carriageway_hazards",
     ]),
-    ("Date and time", ["day_of_week", "month", "hour"]),
+    ("Date and time", ["time_band", "day_of_week", "month", "hour"]),
     ("Vehicles and drivers", [
         "number_of_vehicles", "vehicle_type_first", "vehicle_manoeuvre_first",
         "driver_sex_first", "driver_age_mean", "driver_age_min",
@@ -1481,9 +1477,21 @@ PREDICTION_GROUPS = [
 ]
 # Derived exactly as in the notebook so that the inputs stay consistent.
 DERIVED_FEATURES = {
-    "time_band": "derived from the hour (Section 4.1 bins)",
     "weekend_flag": "derived from the day of week (Saturday or Sunday)",
     "vehicle_records_count": "equal to the number of vehicles (true for every 2021–2025 collision)",
+}
+# A derived model column is set through the input that determines it.
+INPUT_FOR_FEATURE = {"weekend_flag": "day_of_week", "vehicle_records_count": "number_of_vehicles"}
+TOP_PREDICTOR_COUNT = 7
+# Notebook Section 8.4 ranking; used only if outputs/permutation_importance.csv is missing.
+FALLBACK_TOP_PREDICTORS = [
+    "driver_age_mean", "vehicle_type_first", "vehicle_manoeuvre_first", "time_band",
+    "driver_age_min", "speed_limit", "trunk_road_flag",
+]
+# Notebook Section 4.1 time bands, in chronological order.
+TIME_BANDS = {
+    "Night": "00:00–05:59", "Morning peak": "06:00–09:59", "Daytime": "10:00–15:59",
+    "Evening peak": "16:00–19:59", "Late evening": "20:00–23:59",
 }
 NUMERIC_INPUTS = {
     "number_of_vehicles": {"min_value": 1, "max_value": 30, "step": 1, "blank": False},
@@ -1509,6 +1517,50 @@ def time_band_for(hour: float) -> str:
     return "Late evening"
 
 
+def hour_for_band(band: str, default_hour: int) -> int:
+    """Hour sent to the model when only a time band is chosen.
+
+    Uses the training median hour if it lies in the band, otherwise the median
+    recorded collision hour within that band.
+    """
+    if time_band_for(default_hour) == band:
+        return default_hour
+    hours = collisions_all["hour"].dropna().astype(int)
+    bands = pd.cut(hours, bins=[-1, 5, 9, 15, 19, 23], labels=list(TIME_BANDS))
+    in_band = hours[bands == band]
+    return int(round(in_band.median())) if not in_band.empty else default_hour
+
+
+def top_predictors(input_names: list[str]) -> tuple[list[str], dict[str, str]]:
+    """The seven highest-ranked predictors whose effect is distinguishable from noise.
+
+    Ranking and eligibility follow notebook Section 8.4: permutation importance
+    (mean drop in test Macro-F1), keeping only predictors whose mean importance
+    exceeds its own variation across repeats.
+    """
+    importance = notebook_output("permutation_importance.csv")
+    notes: dict[str, str] = {}
+    if importance is None:
+        ranked = FALLBACK_TOP_PREDICTORS
+    else:
+        frame = importance.sort_values("Mean importance", ascending=False).reset_index(drop=True)
+        for rank, (feature, mean, spread) in enumerate(
+                zip(frame["Feature"], frame["Mean importance"], frame["Importance variation"]), start=1):
+            notes[INPUT_FOR_FEATURE.get(feature, feature)] = (
+                f"Rank {rank} of {len(frame)} by permutation importance (notebook Section 8.4): "
+                f"shuffling it lowers test Macro-F1 by {mean:.4f} ± {spread:.4f}."
+            )
+        ranked = frame.loc[frame["Mean importance"] > frame["Importance variation"], "Feature"].tolist()
+    chosen: list[str] = []
+    for feature in ranked:
+        name = INPUT_FOR_FEATURE.get(feature, feature)
+        if name in input_names and name not in chosen:
+            chosen.append(name)
+        if len(chosen) == TOP_PREDICTOR_COUNT:
+            break
+    return chosen, notes
+
+
 def ordered_codes(spec: dict) -> list[str]:
     """Every category the model saw, in a readable order (unknown codes last)."""
     codes = [str(code) for code in spec.get("category_examples") or []]
@@ -1528,10 +1580,10 @@ def ordered_codes(spec: dict) -> list[str]:
     return sorted(dict.fromkeys(codes), key=sort_key)
 
 
-def prediction_widget(spec: dict, important: set[str]):
+def prediction_widget(spec: dict, help_text: str | None = None):
     """Render one input and return it in the representation the pipeline expects."""
     name = spec["feature"]
-    label = feature_label(name) + (" ★" if name in important else "")
+    label = feature_label(name)
     key = f"predict_{name}"
     default = spec.get("default")
     numeric = str(spec.get("dtype", "")).lower() in {"numeric", "number", "float", "integer", "int"}
@@ -1541,14 +1593,24 @@ def prediction_widget(spec: dict, important: set[str]):
             index = SPEED_LIMITS.index(int(float(default)))
         except (TypeError, ValueError):
             index = 1
-        return float(st.selectbox(label, SPEED_LIMITS, index=index, key=key))
+        return float(st.selectbox(label, SPEED_LIMITS, index=index, key=key, help=help_text))
+
+    if name == "time_band":
+        observed = {str(code) for code in spec.get("category_examples") or []}
+        bands = [band for band in TIME_BANDS if not observed or band in observed]
+        bands += sorted(observed - set(bands))
+        index = bands.index(str(default)) if str(default) in bands else 0
+        return st.selectbox(label, bands, index=index, key=key, help=help_text,
+                            format_func=lambda band: f"{band} ({TIME_BANDS[band]})" if band in TIME_BANDS else band)
 
     if name == "hour":
-        try:
-            index = min(max(int(float(default)), 0), 23)
-        except (TypeError, ValueError):
-            index = 12
-        return float(st.selectbox(label, list(range(24)), index=index, format_func=lambda h: f"{h:02d}:00", key=key))
+        # Optional: when left unset, a typical hour inside the chosen time band is used.
+        return st.selectbox(
+            "Exact hour of day (optional)", [None] + list(range(24)), index=0, key=key,
+            format_func=lambda h: "Use the time band" if h is None else f"{h:02d}:00",
+            help=(help_text + " " if help_text else "")
+                 + "Must fall inside the selected time band. If left unset, a typical hour in that band is used.",
+        )
 
     if name in NUMERIC_INPUTS:
         rules = NUMERIC_INPUTS[name]
@@ -1559,16 +1621,16 @@ def prediction_widget(spec: dict, important: set[str]):
         value = min(max(value, float(rules["min_value"])), float(rules["max_value"]))
         if not rules["blank"]:
             return float(st.number_input(label, min_value=int(rules["min_value"]), max_value=int(rules["max_value"]),
-                                         value=int(round(value)), step=1, key=key))
+                                         value=int(round(value)), step=1, key=key, help=help_text))
         return float(st.number_input(label, min_value=rules["min_value"], max_value=rules["max_value"],
-                                     value=value, step=rules["step"], key=key))
+                                     value=value, step=rules["step"], key=key, help=help_text))
 
     if not numeric:
         codes = ordered_codes(spec)
         index = codes.index(str(default)) if str(default) in codes else 0
         has_labels = FIELD_ALIASES.get(name, name) in STATS19_LABELS
         return st.selectbox(
-            label, codes, index=index, key=key,
+            label, codes, index=index, key=key, help=help_text,
             format_func=(lambda code, field=name: code_label(field, code)) if has_labels else str,
         )
 
@@ -1576,7 +1638,7 @@ def prediction_widget(spec: dict, important: set[str]):
         value = float(default)
     except (TypeError, ValueError):
         value = 0.0
-    return float(st.number_input(label, value=value, key=key))
+    return float(st.number_input(label, value=value, key=key, help=help_text))
 
 
 def readable_input(name: str, value) -> str:
@@ -1588,6 +1650,8 @@ def readable_input(name: str, value) -> str:
         return f"{int(value):02d}:00"
     if name == "weekend_flag":
         return "Weekend" if float(value) == 1 else "Weekday"
+    if name == "time_band" and value in TIME_BANDS:
+        return f"{value} ({TIME_BANDS[value]})"
     if isinstance(value, str) and FIELD_ALIASES.get(name, name) in STATS19_LABELS:
         return code_label(name, value)
     if isinstance(value, float):
@@ -1597,13 +1661,21 @@ def readable_input(name: str, value) -> str:
 
 def render_prediction():
     section_heading("Severity Prediction")
-    st.markdown(f'<div class="notice">{RESEARCH_ONLY_NOTICE}</div>', unsafe_allow_html=True)
     try:
         model, contract, metadata, specs, version_warnings = load_prediction_assets(artefact_signature())
     except ModuleNotFoundError as exc:
         st.error(f"A Python package needed by the saved model is missing: {exc.name}.")
-        st.code(f'"{sys.executable}" -m pip install -r requirements.txt', language="bash")
-        st.caption("The pipeline was saved with scikit-learn 1.7.2; requirements.txt pins that version.")
+        if sys.version_info < (3, 10):
+            st.markdown(
+                f"This app is running on **Python {sys.version.split()[0]}** (`{sys.executable}`). "
+                "The model was saved with scikit-learn 1.7.2, which requires Python 3.10 or newer. "
+                "Start the app with the Python environment used for the notebook (Python 3.13), for example:"
+            )
+            st.code("python -m streamlit run App_Prediction.py   # from the Anaconda / Python 3.13 environment",
+                    language="bash")
+        else:
+            st.code(f'"{sys.executable}" -m pip install -r requirements.txt', language="bash")
+            st.caption("The pipeline was saved with scikit-learn 1.7.2; requirements.txt pins that version.")
         return
     except Exception as exc:
         st.error("The prediction assets could not be loaded.")
@@ -1616,43 +1688,51 @@ def render_prediction():
 
     names = [spec["feature"] for spec in specs]
     spec_by_name = {spec["feature"]: spec for spec in specs}
-    importance = notebook_output("permutation_importance.csv")
-    important = set(importance.head(10)["Feature"]) if importance is not None else set()
+    input_names = [n for n in names if n not in DERIVED_FEATURES]
+    top, importance_notes = top_predictors(input_names)
+    rest = [n for n in input_names if n not in top]
     model_name = metadata.get("model", "the selected model")
     st.caption(
         f"{model_name} pipeline from {NOTEBOOK_NAME}, trained on 411,040 collisions (2021–2025) with "
         f"{len(names)} predictors. It estimates the severity of a collision that has already happened; "
-        f"it does not predict whether a collision will occur. ★ = one of the ten most influential inputs "
-        f"(permutation importance, Section 8.4). Defaults are the training medians and most common categories."
+        f"it does not predict whether a collision will occur."
     )
 
     grouped = {name for _, members in PREDICTION_GROUPS for name in members}
-    groups = list(PREDICTION_GROUPS)
-    others = [n for n in names if n not in grouped and n not in DERIVED_FEATURES]
-    if others:
-        groups.append(("Other model inputs", others))
+    groups = [(title, [m for m in members if m in rest]) for title, members in PREDICTION_GROUPS]
+    groups.append(("Other model inputs", [n for n in rest if n not in grouped]))
+    groups = [(title, members) for title, members in groups if members]
 
     values: dict[str, Any] = {}
     with st.form("collision_severity_prediction"):
-        for title, members in groups:
-            members = [m for m in members if m in spec_by_name]
-            if not members:
-                continue
-            st.markdown(f"<div class='form-group-title'>{title}</div>", unsafe_allow_html=True)
-            columns = st.columns(3)
-            for i, name in enumerate(members):
-                with columns[i % 3]:
-                    values[name] = prediction_widget(spec_by_name[name], important)
-        blankable = [n for n, rules in NUMERIC_INPUTS.items() if rules["blank"] and n in spec_by_name]
-        not_recorded = st.multiselect(
-            "Values not recorded for this collision", blankable, format_func=feature_label,
-            key="predict_not_recorded", placeholder="All values recorded",
-            help="Selected values are sent as missing, and the pipeline imputes the training median, "
-                 "exactly as it did for missing values during training.",
-        ) if blankable else []
-        derived_notes = [f"{feature_label(n)} is {why}" for n, why in DERIVED_FEATURES.items() if n in spec_by_name]
-        if derived_notes:
-            st.caption("; ".join(derived_notes) + ".")
+        st.markdown(f"<div class='form-group-title'>Top {len(top)} predictors</div>", unsafe_allow_html=True)
+        st.caption("The predictors with the largest effect on the model, in rank order: permutation importance "
+                   "from notebook Section 8.4, counting only predictors whose effect is larger than its own "
+                   "variation. Hover over ? for each predictor's effect size.")
+        columns = st.columns(4)
+        for i, name in enumerate(top):
+            with columns[i % 4]:
+                values[name] = prediction_widget(spec_by_name[name], importance_notes.get(name))
+
+        with st.expander(f"Other predictors ({len(rest)})", expanded=False):
+            st.caption("Pre-filled with the training medians and most common categories. Change any that are "
+                       "known for the collision.")
+            for title, members in groups:
+                st.markdown(f"<div class='form-group-title'>{title}</div>", unsafe_allow_html=True)
+                columns = st.columns(3)
+                for i, name in enumerate(members):
+                    with columns[i % 3]:
+                        values[name] = prediction_widget(spec_by_name[name], importance_notes.get(name))
+            blankable = [n for n, rules in NUMERIC_INPUTS.items() if rules["blank"] and n in spec_by_name]
+            not_recorded = st.multiselect(
+                "Values not recorded for this collision", blankable, format_func=feature_label,
+                key="predict_not_recorded", placeholder="All values recorded",
+                help="Selected values are sent as missing, and the pipeline imputes the training median, "
+                     "exactly as it did for missing values during training.",
+            ) if blankable else []
+            derived_notes = [f"{feature_label(n)} is {why}" for n, why in DERIVED_FEATURES.items() if n in spec_by_name]
+            if derived_notes:
+                st.caption("; ".join(derived_notes) + ".")
         submitted = st.form_submit_button("Run severity prediction", type="primary", **stretch(st.form_submit_button))
 
     if not submitted:
@@ -1660,8 +1740,20 @@ def render_prediction():
 
     for name in not_recorded:
         values[name] = np.nan
-    if "time_band" in spec_by_name:
-        values["time_band"] = time_band_for(values["hour"]) if "hour" in values else str(spec_by_name["time_band"]["default"])
+    if "hour" in spec_by_name:
+        try:
+            default_hour = min(max(int(float(spec_by_name["hour"]["default"])), 0), 23)
+        except (TypeError, ValueError):
+            default_hour = 12
+        chosen_hour, band = values.get("hour"), values.get("time_band")
+        if chosen_hour is None:
+            values["hour"] = float(hour_for_band(band, default_hour) if band else default_hour)
+        elif band and time_band_for(chosen_hour) != band:
+            st.error(f"{chosen_hour:02d}:00 falls in the {time_band_for(chosen_hour)} band, not {band}. "
+                     f"Change the time band or the exact hour and run again.")
+            return
+        else:
+            values["hour"] = float(chosen_hour)
     if "weekend_flag" in spec_by_name:
         values["weekend_flag"] = (1.0 if str(values.get("day_of_week")) in {"1", "7"} else 0.0) \
             if "day_of_week" in values else float(spec_by_name["weekend_flag"]["default"])
@@ -1742,8 +1834,7 @@ def render_prediction():
         show_table(review)
     with st.expander("Prediction scope and limitations"):
         st.write(contract.get("scope_warning", "The model predicts severity conditional on a recorded collision."))
-        st.warning(f"Notebook acceptance decision: {contract.get('operational_warning', 'not recorded')}. "
-                   + RESEARCH_ONLY_NOTICE)
+        st.warning(f"Notebook acceptance decision: {contract.get('operational_warning', 'not recorded')}.")
         st.write("The test-set results on the Model Insights page show the error rates to expect, including "
                  "missed severe collisions and false alarms.")
 
@@ -1812,7 +1903,7 @@ def render_model_insights():
         passed_text = f" — passed {int(passed.sum())} of {len(gate)} acceptance tests"
     st.markdown(
         f'<div class="notice"><b>Selected model:</b> {selected_model} (highest three-fold cross-validated '
-        f'Macro-F1). <b>Acceptance decision:</b> {decision}{passed_text}. {RESEARCH_ONLY_NOTICE}</div>',
+        f'Macro-F1). <b>Acceptance decision:</b> {decision}{passed_text}.</div>',
         unsafe_allow_html=True,
     )
 
