@@ -1,0 +1,48 @@
+Predictor,Category,severity_label,Standardized residual
+speed_limit,60,Fatal,48.98664828376636
+speed_limit,60,Serious,41.57092846233411
+speed_limit,60,Slight,-29.58975967754213
+speed_limit,70,Fatal,26.278949523532813
+speed_limit,30,Fatal,-25.599020558805318
+speed_limit,20,Fatal,-24.593421023045234
+speed_limit,20,Serious,-22.079027542254217
+speed_limit,50,Fatal,17.574801624191036
+speed_limit,20,Slight,15.517280578583552
+speed_limit,30,Serious,-10.361935815243534
+speed_limit,30,Slight,9.240090708968143
+speed_limit,50,Serious,8.607190177927366
+speed_limit,50,Slight,-7.161555384962837
+speed_limit,40,Fatal,5.698779956925073
+speed_limit,70,Serious,-5.233441889495462
+speed_limit,40,Serious,5.126185731618537
+speed_limit,40,Slight,-3.601158348458251
+speed_limit,70,Slight,-0.7934806841750608
+speed_limit,Other or rare,Serious,0.3849881419275019
+speed_limit,Other or rare,Fatal,-0.2100017419123125
+urban_or_rural_area,2,Fatal,46.16366068163799
+urban_or_rural_area,2,Serious,32.66253942158936
+urban_or_rural_area,1,Fatal,-32.24255481729974
+urban_or_rural_area,2,Slight,-24.31765588732278
+urban_or_rural_area,1,Serious,-22.824976702695775
+urban_or_rural_area,1,Slight,16.99108043588242
+urban_or_rural_area,Other or rare,Serious,1.0502193336617436
+urban_or_rural_area,Other or rare,Slight,-0.5974148316404342
+urban_or_rural_area,Other or rare,Fatal,0.1596171457068376
+junction_control,9,Serious,-38.51940560008908
+junction_control,-1,Fatal,30.759281826207896
+junction_control,9,Slight,22.88411939111333
+junction_control,-1,Serious,22.69348509153723
+junction_control,4,Fatal,-19.21017788280928
+junction_control,2,Serious,-18.99589191933963
+junction_control,-1,Slight,-16.712496767693093
+junction_control,2,Fatal,-14.740328141998742
+junction_control,9,Fatal,-12.83704536754939
+junction_control,2,Slight,12.456512301369282
+junction_control,4,Slight,4.7088045259743305
+junction_control,1,Fatal,-4.471667424359249
+junction_control,3,Fatal,-3.802921514847095
+junction_control,4,Serious,-3.7129195001890944
+junction_control,1,Serious,-2.4289218423245185
+junction_control,3,Serious,-2.3127316135489466
+junction_control,1,Slight,1.953022790417047
+junction_control,3,Slight,1.7962545909658882

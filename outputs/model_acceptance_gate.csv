@@ -1,0 +1,6 @@
+Acceptance test,Passed,Overall decision
+Performs better than the no-skill model,True,Further model improvement recommended
+Macro-F1 is at least 0.60,False,Further model improvement recommended
+Balanced accuracy is at least 0.60,False,Further model improvement recommended
+Serious recall is at least 0.60,False,Further model improvement recommended
+Fatal recall is at least 0.60,False,Further model improvement recommended

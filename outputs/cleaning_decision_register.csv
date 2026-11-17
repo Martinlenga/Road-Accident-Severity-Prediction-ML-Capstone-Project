@@ -1,0 +1,8 @@
+Issue,Treatment,Reason
+Collision key duplication,Stop execution if the collision key is not unique,The primary modelling unit must remain one row per collision
+Missing target,Exclude from supervised modelling only,A known outcome is required to train and evaluate a classifier
+Negative administrative codes,Treat as unknown categories or missing numeric values,Values such as -1 are not real road-safety measurements
+Missing categorical predictors,Impute inside the pipeline,Fitting preprocessing only on training folds prevents leakage
+Rare categories in Chi-square tests,Collapse categories with fewer than 100 observations,Reduces unstable expected cell counts
+Multiple vehicle rows per collision,Aggregate before joining to the collision target,Prevents repeated collision outcomes
+Casualty outcome variables,Analyse separately from collision prediction,Casualty severity could directly reveal the collision outcome

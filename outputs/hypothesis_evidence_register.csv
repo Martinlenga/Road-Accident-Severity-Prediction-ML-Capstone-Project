@@ -1,0 +1,5 @@
+Hypothesis,Variables tested,Significant variables,Strongest predictor,Largest Cramer V,Decision
+H1 Road and environment,13,13,speed_limit,0.09039812429475388,Evidence of association
+H2 Driver and vehicle,3,3,vehicle_manoeuvre_first,0.11747674327489793,Evidence of association
+H3 Temporal characteristics,6,6,hour,0.04959055865058623,Evidence of association
+H4 Casualty characteristics,9,9,casualty_type,0.16127454498110622,Evidence of association

@@ -1,0 +1,16 @@
+Model,Actual,Predicted Slight,Predicted Serious,Predicted Fatal
+Weighted neural network,Actual Slight,44978,24282,8627
+Weighted neural network,Actual Serious,8156,10828,4379
+Weighted neural network,Actual Fatal,241,624,646
+Weighted random forest,Actual Slight,71723,6080,84
+Weighted random forest,Actual Serious,18624,4656,83
+Weighted random forest,Actual Fatal,933,544,34
+Weighted logistic,Actual Slight,43329,19285,15273
+Weighted logistic,Actual Serious,7911,8287,7165
+Weighted logistic,Actual Fatal,203,304,1004
+Decision tree,Actual Slight,43999,20725,13163
+Decision tree,Actual Serious,8599,8399,6365
+Decision tree,Actual Fatal,259,394,858
+Histogram gradient boosting,Actual Slight,76813,1064,10
+Histogram gradient boosting,Actual Serious,21779,1576,8
+Histogram gradient boosting,Actual Fatal,1313,185,13

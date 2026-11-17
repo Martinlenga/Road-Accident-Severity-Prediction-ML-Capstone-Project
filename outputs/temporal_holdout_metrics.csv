@@ -1,0 +1,2 @@
+Test year,Training records,Test records,Fit warnings,Macro-F1,Balanced accuracy,Serious recall,Fatal recall
+2025,412276,101525,1,0.37252589337924885,0.48703373606590245,0.525663927593188,0.41706813489332417

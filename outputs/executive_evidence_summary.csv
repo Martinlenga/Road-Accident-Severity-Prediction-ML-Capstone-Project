@@ -1,0 +1,10 @@
+Finding,Result
+Models compared,4 shortlisted models + weighted neural network + no-skill baseline
+Selection rule,Highest cross-validated Macro-F1
+Selected model,Weighted neural network
+Overall accuracy,54.9%
+Balanced accuracy,48.9%
+Macro-F1,0.379
+Serious recall,46.3%
+Fatal recall,42.8%
+Deployment decision,Further model improvement recommended

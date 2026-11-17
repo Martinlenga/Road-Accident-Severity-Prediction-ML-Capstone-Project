@@ -1,7 +1,93 @@
 {
-  "model": "CatBoost depth-7",
-  "selection_policy": "Qualitative comparison of the five requested models using their stratified-CV Macro-F1, balanced accuracy, Serious/Fatal precision and recall, runtime, and recorded warnings. The order is justified by the displayed merits and demerits; no mean metric score or mean merit rank is calculated.",
-  "cv_comparison_position": 1,
+  "model": "Weighted neural network",
+  "candidate_models": [
+    "Weighted random forest",
+    "Weighted logistic",
+    "Decision tree",
+    "Histogram gradient boosting",
+    "Weighted neural network"
+  ],
+  "additional_models": [
+    "Weighted neural network"
+  ],
+  "selection_rule": "Highest three-fold cross-validated Macro-F1",
+  "candidate_test_comparison": [
+    {
+      "CV rank": 1,
+      "Model": "Weighted neural network",
+      "CV Macro-F1": 0.3887270341,
+      "Test Macro-F1": 0.3789907281,
+      "Balanced accuracy": 0.4894923135,
+      "Overall accuracy": 0.5493523808,
+      "Weighted F1": 0.6039968433,
+      "Slight recall": 0.5774776278,
+      "Serious recall": 0.4634678766,
+      "Fatal recall": 0.4275314361,
+      "Severe predicted Slight": 0.3375814103,
+      "Fit time (seconds)": 132.0060004,
+      "Fit warnings": 1
+    },
+    {
+      "CV rank": 2,
+      "Model": "Weighted random forest",
+      "CV Macro-F1": 0.368099493,
+      "Test Macro-F1": 0.3854911657,
+      "Balanced accuracy": 0.3808836121,
+      "Overall accuracy": 0.7435992254,
+      "Weighted F1": 0.7043979169,
+      "Slight recall": 0.920859707,
+      "Serious recall": 0.1992894748,
+      "Fatal recall": 0.0225016545,
+      "Severe predicted Slight": 0.786242663,
+      "Fit time (seconds)": 61.860293,
+      "Fit warnings": 0
+    },
+    {
+      "CV rank": 3,
+      "Model": "Weighted logistic",
+      "CV Macro-F1": 0.3571314198,
+      "Test Macro-F1": 0.3579963955,
+      "Balanced accuracy": 0.5251575706,
+      "Overall accuracy": 0.512061969,
+      "Weighted F1": 0.582586193,
+      "Slight recall": 0.5563059304,
+      "Serious recall": 0.3547061593,
+      "Fatal recall": 0.6644606221,
+      "Severe predicted Slight": 0.3262040685,
+      "Fit time (seconds)": 29.0283989,
+      "Fit warnings": 0
+    },
+    {
+      "CV rank": 4,
+      "Model": "Decision tree",
+      "CV Macro-F1": 0.3493756347,
+      "Test Macro-F1": 0.3563597558,
+      "Balanced accuracy": 0.4974146902,
+      "Overall accuracy": 0.5182510875,
+      "Weighted F1": 0.583510444,
+      "Slight recall": 0.5649081361,
+      "Serious recall": 0.3595000642,
+      "Fatal recall": 0.5678358703,
+      "Severe predicted Slight": 0.3561148187,
+      "Fit time (seconds)": 16.5212053,
+      "Fit warnings": 0
+    },
+    {
+      "CV rank": 5,
+      "Model": "Histogram gradient boosting",
+      "CV Macro-F1": 0.3285934271,
+      "Test Macro-F1": 0.3337662712,
+      "Balanced accuracy": 0.3540904855,
+      "Overall accuracy": 0.7629548175,
+      "Weighted F1": 0.6825335868,
+      "Slight recall": 0.9862107926,
+      "Serious recall": 0.0674570903,
+      "Fatal recall": 0.0086035738,
+      "Severe predicted Slight": 0.928358929,
+      "Fit time (seconds)": 23.5327694,
+      "Fit warnings": 0
+    }
+  ],
   "features": [
     "road_type",
     "speed_limit",
@@ -29,12 +115,7 @@
     "vehicle_type_first",
     "driver_sex_first",
     "vehicle_manoeuvre_first",
-    "vehicle_records_count",
-    "vehicle_age_max",
-    "motorcycle_involved",
-    "goods_vehicle_involved",
-    "vulnerable_road_user_count",
-    "vulnerable_road_user_involved"
+    "vehicle_records_count"
   ],
   "numeric_features": [
     "speed_limit",
@@ -45,12 +126,7 @@
     "driver_age_min",
     "vehicle_age_mean",
     "engine_cc_mean",
-    "vehicle_records_count",
-    "vehicle_age_max",
-    "motorcycle_involved",
-    "goods_vehicle_involved",
-    "vulnerable_road_user_count",
-    "vulnerable_road_user_involved"
+    "vehicle_records_count"
   ],
   "categorical_features": [
     "road_type",
@@ -73,24 +149,15 @@
     "vehicle_manoeuvre_first"
   ],
   "metrics": {
-    "Selected model": "CatBoost depth-7",
-    "Selection policy": "Qualitative comparison of the five requested models using their stratified-CV Macro-F1, balanced accuracy, Serious/Fatal precision and recall, runtime, and recorded warnings. The order is justified by the displayed merits and demerits; no mean metric score or mean merit rank is calculated.",
-    "CV comparison position": 1,
-    "Macro-F1": 0.3925399788906921,
-    "Balanced accuracy": 0.5676624413938969,
-    "Serious precision": 0.32013452630243033,
-    "Serious recall": 0.4318794675341352,
-    "Fatal precision": 0.05755719183857006,
-    "Fatal recall": 0.6776968894771674
+    "Selected model": "Weighted neural network",
+    "Overall accuracy": 0.5493523807670225,
+    "Balanced accuracy": 0.4894923135124758,
+    "Macro-F1": 0.3789907281253864,
+    "Weighted F1": 0.603996843300656,
+    "Serious recall": 0.46346787655694904,
+    "Fatal recall": 0.42753143613500993
   },
-  "decision_multipliers": {
-    "Slight": 1.0,
-    "Serious": 1.0,
-    "Fatal": 1.0
-  },
-  "prediction_rule": "argmax(class_probability * class_multiplier)",
   "random_state": 42,
   "acceptance_decision": "Further model improvement recommended",
-  "use_status": "RESEARCH ONLY - acceptance gate failed; not approved for operational decisions.",
   "scope": "Predicts severity conditional on a recorded personal-injury collision. It does not predict whether a collision will occur."
 }

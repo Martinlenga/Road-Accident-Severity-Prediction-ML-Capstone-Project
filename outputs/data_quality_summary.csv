@@ -1,0 +1,8 @@
+Quality area,Result,Decision
+Duplicate collision identifiers,0,Must be zero before modelling
+Duplicate complete collision rows,0,Review before removal; do not delete automatically
+Missing collision severity,0,Exclude only from supervised modelling
+Vehicle-to-collision linkage,100.00%,Investigate if below 99%
+Casualty-to-collision linkage,100.00%,Investigate if below 99%
+Fields with ordinary missing values,4,Use pipeline imputation where the field is modelled
+Fields containing negative administrative codes,59,"Treat as unknown codes, not negative measurements"

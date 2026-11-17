@@ -1,0 +1,4 @@
+Check,Result,Status
+Collision key is unique,True,PASS
+Vehicle records linked to collision,1.0,PASS
+Casualty records linked to collision,1.0,PASS

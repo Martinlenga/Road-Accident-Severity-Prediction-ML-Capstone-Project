@@ -1,0 +1,8 @@
+Variable,Observed codes,Mapped codes,Unmapped codes,Complete
+day_of_week,7,7,[],True
+junction_detail,8,8,[],True
+light_conditions,6,6,[],True
+road_surface_conditions,7,7,[],True
+road_type,6,6,[],True
+urban_or_rural_area,4,4,[],True
+weather_conditions,10,10,[],True

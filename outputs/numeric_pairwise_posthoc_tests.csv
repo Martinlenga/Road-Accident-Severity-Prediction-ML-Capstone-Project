@@ -1,0 +1,10 @@
+Predictor,Comparison,Statistic,P-value,First median,Second median,Adjusted P-value,Significant after correction
+speed_limit,Slight vs Serious,20811282884.5,0.0,30.0,30.0,0.0,True
+speed_limit,Slight vs Fatal,879244573.5,0.0,30.0,50.0,0.0,True
+speed_limit,Serious vs Fatal,297102708.0,0.0,30.0,50.0,0.0,True
+hour,Slight vs Serious,22390085875.0,4.323509326447558e-16,14.0,15.0,6.485263989671338e-16,True
+hour,Slight vs Fatal,1483011735.0,0.21117169462107743,14.0,14.0,0.21117169462107743,False
+hour,Serious vs Fatal,450640915.0,0.0016558917315945968,15.0,14.0,0.0018628781980439214,True
+number_of_vehicles,Slight vs Serious,25154517795.0,0.0,2.0,2.0,0.0,True
+number_of_vehicles,Slight vs Fatal,1646889789.0,1.8893317313249876e-99,2.0,2.0,3.400797116384978e-99,True
+number_of_vehicles,Serious vs Fatal,450383787.0,0.0006384994618699762,2.0,2.0,0.0008209278795471123,True

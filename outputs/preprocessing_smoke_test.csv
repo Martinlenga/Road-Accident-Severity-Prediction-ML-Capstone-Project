@@ -1,0 +1,3 @@
+Preprocessor,Status,Input records,Input predictors,Output predictors,Run time (seconds)
+One-hot preprocessor,PASS,5000,27,107,0.2564097999711521
+Tree preprocessor,PASS,5000,27,27,0.11886410001898184

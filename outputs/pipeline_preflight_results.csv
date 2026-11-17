@@ -1,0 +1,11 @@
+Check,Status,Details
+Training predictors available,PASS,"411,040 training records"
+Training target available,PASS,"411,040 target values"
+Predictor and target rows match,PASS,"X = 411,040; y = 411,040"
+All severity classes present,PASS,"Fatal, Serious, Slight"
+All selected predictors available,PASS,All predictors found
+Every predictor has a statistical type,PASS,9 numeric; 18 categorical
+No predictor has two statistical types,PASS,No duplicate assignments
+All candidate models defined,PASS,4 shortlisted + 1 additional candidate + 1 baseline ready
+Neural network receives balanced weights,PASS,Fatal weight 22.68; Slight weight 0.44
+No obvious target leakage,PASS,No obvious leakage fields found

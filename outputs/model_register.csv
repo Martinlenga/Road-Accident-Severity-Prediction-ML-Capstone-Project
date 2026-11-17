@@ -1,0 +1,7 @@
+Model,Role,Algorithm family,Class-imbalance handling
+Weighted random forest,Shortlisted candidate,Bagged tree ensemble (150 trees),class_weight='balanced_subsample'
+Weighted logistic,Shortlisted candidate,Linear multinomial logistic regression,class_weight='balanced'
+Decision tree,Shortlisted candidate,Single tree (max depth 12),class_weight='balanced'
+Histogram gradient boosting,Shortlisted candidate,Boosted tree ensemble (150 iterations),None (unweighted)
+Weighted neural network,Additional candidate,Feed-forward neural network (64-32 ReLU),Balanced sample weights at fit time
+Dummy majority,Reference baseline only,No-skill rule,None - always predicts Slight

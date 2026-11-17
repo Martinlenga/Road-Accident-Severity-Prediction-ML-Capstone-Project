@@ -1,0 +1,4 @@
+Model,Warning type,Message
+Weighted neural network,ConvergenceWarning,Stochastic Optimizer: Maximum iterations (40) reached and the optimization hasn't converged yet.
+Weighted neural network,ConvergenceWarning,Stochastic Optimizer: Maximum iterations (40) reached and the optimization hasn't converged yet.
+Weighted neural network,ConvergenceWarning,Stochastic Optimizer: Maximum iterations (40) reached and the optimization hasn't converged yet.

@@ -1,0 +1,2 @@
+Selected model,Overall accuracy,Balanced accuracy,Macro-F1,Weighted F1,Serious recall,Fatal recall
+Weighted neural network,0.5493523807670225,0.4894923135124758,0.3789907281253864,0.603996843300656,0.46346787655694904,0.42753143613500993

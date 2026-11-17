@@ -1,0 +1,7 @@
+Feature,Detection result,count,mean,median
+speed_limit,Detected as non-Slight,16477,39.9447714996662,30.0
+speed_limit,Missed severe case,8397,34.0669286649994,30.0
+hour,Detected as non-Slight,16477,13.892456150998362,15.0
+hour,Missed severe case,8397,13.658449446230797,14.0
+driver_age_mean,Detected as non-Slight,15859,43.24837198632756,42.0
+driver_age_mean,Missed severe case,7987,39.96534502495126,38.5
