@@ -677,6 +677,67 @@ st.markdown(
     }}
     [data-testid="stForm"] [data-baseweb="select"] svg {{ fill:#927EAF !important; }}
 
+    /* INPUT SURFACES — native Streamlit controls must never inherit dark-theme
+       fills or text. BaseWeb draws inputs in several nested layers, so styling
+       only the outer border leaves inner elements black on some releases. */
+    :is([data-testid="stTextInput"], [data-testid="stNumberInput"],
+        [data-testid="stTextArea"], [data-testid="stDateInput"],
+        [data-testid="stTimeInput"], [data-testid="stForm"])
+        :is([data-baseweb="base-input"], [data-baseweb="input"],
+            [data-baseweb="textarea"]) {{
+      background-color:#FFFCFA !important;
+      color:{INK} !important;
+      color-scheme:light !important;
+    }}
+    :is([data-testid="stTextInput"], [data-testid="stNumberInput"],
+        [data-testid="stTextArea"], [data-testid="stDateInput"],
+        [data-testid="stTimeInput"], [data-testid="stForm"])
+        :is([data-baseweb="base-input"], [data-baseweb="input"],
+            [data-baseweb="textarea"]) > div {{
+      background-color:#FFFCFA !important;
+      color:{INK} !important;
+      color-scheme:light !important;
+    }}
+    :is([data-testid="stTextInput"], [data-testid="stNumberInput"],
+        [data-testid="stTextArea"], [data-testid="stDateInput"],
+        [data-testid="stTimeInput"], [data-testid="stForm"])
+        :is(input, textarea) {{
+      background-color:#FFFCFA !important;
+      color:{INK} !important;
+      -webkit-text-fill-color:{INK} !important;
+      caret-color:#50978C !important;
+      color-scheme:light !important;
+    }}
+    :is([data-testid="stTextInput"], [data-testid="stNumberInput"],
+        [data-testid="stTextArea"], [data-testid="stDateInput"],
+        [data-testid="stTimeInput"], [data-testid="stForm"])
+        :is(input,textarea)::placeholder {{
+      color:#827C91 !important;
+      -webkit-text-fill-color:#827C91 !important;
+      opacity:1 !important;
+    }}
+    /* Single-select and multiselect display values, including the prediction
+       form and sidebar filters, should use dark ink on their light field. */
+    [data-baseweb="select"] > div,
+    [data-baseweb="select"] [role="combobox"] {{
+      color:{INK} !important;
+      color-scheme:light !important;
+    }}
+    [data-baseweb="select"] [role="combobox"]:not([data-baseweb="tag"]) {{
+      -webkit-text-fill-color:{INK} !important;
+    }}
+    /* Preserve the existing mint selection chips and lilac dropdown option rows. */
+    [data-baseweb="tag"], [data-baseweb="tag"] span {{
+      color:#2D7168 !important;
+      -webkit-text-fill-color:#2D7168 !important;
+    }}
+    /* Disabled values stay legible instead of inheriting dark-theme opacity. */
+    [data-testid="stForm"] :is(input,textarea):disabled {{
+      color:#65738A !important;
+      -webkit-text-fill-color:#65738A !important;
+      opacity:.76 !important;
+    }}
+
     /* Buttons are colourful without returning to the dark-theme look. */
     div.stButton > button,
     div[data-testid="stDownloadButton"] button,
@@ -815,7 +876,7 @@ COLUMN_ALIASES = {"accident_index": "collision_index", "accident_severity": "col
 
 
 def snake_case(value) -> str:
-    """Same column-name standardisation as the notebook (Section 3.4)."""
+    """Same column-name standardisation as the notebook."""
     cleaned = re.sub(r"[^a-z0-9]+", "_", str(value).strip().lower())
     cleaned = re.sub(r"_+", "_", cleaned).strip("_")
     return COLUMN_ALIASES.get(cleaned, cleaned)
@@ -1057,7 +1118,7 @@ def artefact_signature() -> tuple:
 
 @st.cache_resource(show_spinner="Loading the saved severity model...")
 def load_prediction_assets(signature: tuple):
-    """Load the notebook's fitted pipeline and its input contract (Sections 9.2-9.3)."""
+    """Load the notebook's fitted pipeline and its input contract."""
     import joblib  # imported here so the dashboards still run without scikit-learn
 
     if not MODEL_PATH.exists():
@@ -1235,7 +1296,7 @@ def stacked_severity_chart(frame, category, title, sort=None, severity_col="seve
 
 
 def severe_share_table(df: pd.DataFrame, column: str, min_records: int = 250) -> tuple[pd.DataFrame, int]:
-    """Serious/Fatal share by category, as in notebook Sections 4.4-4.5."""
+    """Serious/Fatal share by category."""
     grouped = (
         df.groupby(column, observed=True)
         .agg(Collisions=("is_severe", "size"), Severe=("is_severe", "sum"), Fatal=("is_fatal", "sum"))
@@ -1359,7 +1420,7 @@ with st.sidebar:
         f'<div style="padding:12px 3px 18px;border-bottom:1px solid {BORDER};margin-bottom:16px">'
         f'<div style="display:flex;align-items:center;gap:10px;font-family:Space Grotesk;font-size:1.24rem;font-weight:800;color:{INK};letter-spacing:-.04em">'
         f'<span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:11px;background:linear-gradient(145deg,{TEAL},{CYAN});color:#10202B;font-size:1.2rem">🚦</span>'
-        f'<span>ROAD<span style="color:{TEAL}">/</span>SAFETY</span></div>'
+        f'<span>ROAD<span style="color:{TEAL}"> </span>SAFETY</span></div>'
         f'<div style="color:{MUTED};font-size:.65rem;letter-spacing:.16em;text-transform:uppercase;margin-top:3px">'
         f'Intelligence platform · STATS19 {year_span(ALL_YEARS)}</div></div>',
         unsafe_allow_html=True,
@@ -1549,7 +1610,7 @@ def render_overview():
             st.map(geo[["latitude", "longitude", "color"]].copy(),
                    latitude="latitude", longitude="longitude", color="color", size=60)
             st.caption("Colour = severity: green Slight, amber Serious, red Fatal. Coordinates are for description "
-                       "only and are not model inputs (notebook Section 4.9).")
+                       "only and are not model inputs.")
 
 
 FACTOR_OPTIONS = {
@@ -1584,7 +1645,7 @@ def render_collision_analytics():
         show_chart(chart)
 
     panel("Serious/Fatal share by road and environment factor",
-          "Within-category share of collisions that were Serious or Fatal. "
+          "Within-category share of collisions that were Serious or Fatal, as in notebook Sections 4.4–4.5. "
           "Categories with fewer than 250 collisions in the current selection are hidden.")
     c1, c2 = st.columns([1, 1])
     with c1:
@@ -1682,7 +1743,7 @@ def residual_category_label(predictor: str, category) -> str:
 
 def render_statistical_evidence():
     section_heading("Statistical Evidence")
-    st.caption(f"Results from {NOTEBOOK_NAME}, computed on every collision, vehicle and "
+    st.caption(f"Results from {NOTEBOOK_NAME} (Sections 3, 5 and 6.2), computed on every collision, vehicle and "
                f"casualty record for {year_span(ALL_YEARS)}. The sidebar filters do not change these results.")
 
     quality = notebook_output("data_quality_summary.csv")
@@ -1873,7 +1934,7 @@ def hour_for_band(band: str, default_hour: int) -> int:
 def top_predictors(input_names: list[str]) -> tuple[list[str], dict[str, str]]:
     """The seven highest-ranked predictors whose effect is distinguishable from noise.
 
-    Ranking and eligibility follow notebook Section 8.4: permutation importance
+    Ranking and eligibility: permutation importance
     (mean drop in test Macro-F1), keeping only predictors whose mean importance
     exceeds its own variation across repeats.
     """
@@ -1886,7 +1947,7 @@ def top_predictors(input_names: list[str]) -> tuple[list[str], dict[str, str]]:
         for rank, (feature, mean, spread) in enumerate(
                 zip(frame["Feature"], frame["Mean importance"], frame["Importance variation"]), start=1):
             notes[INPUT_FOR_FEATURE.get(feature, feature)] = (
-                f"Rank {rank} of {len(frame)} by permutation importance (notebook Section 8.4): "
+                f"Rank {rank} of {len(frame)} by permutation importance: "
                 f"shuffling it lowers test Macro-F1 by {mean:.4f} ± {spread:.4f}."
             )
         ranked = frame.loc[frame["Mean importance"] > frame["Importance variation"], "Feature"].tolist()
@@ -2046,7 +2107,7 @@ def render_prediction():
     with st.form("collision_severity_prediction"):
         st.markdown(f"<div class='form-group-title'>Top {len(top)} predictors</div>", unsafe_allow_html=True)
         st.caption("The predictors with the largest effect on the model, in rank order: permutation importance "
-                   "from notebook Section 8.4, counting only predictors whose effect is larger than its own "
+                   "counting only predictors whose effect is larger than its own "
                    "variation. Hover over ? for each predictor's effect size.")
         columns = st.columns(4)
         for i, name in enumerate(top):
@@ -2270,7 +2331,7 @@ def render_model_insights():
             view = gate[["Acceptance test", "Passed"]].copy()
             view["Passed"] = view["Passed"].astype(str).str.lower().map({"true": "✅ Passed", "false": "❌ Not met"})
             show_table(view)
-        panel("Hypotheses H5–H7 (Section 10.3)")
+        panel("Hypotheses H5–H7")
         h_rows = hypotheses_h5_to_h7()
         if h_rows is None:
             missing_output("model_comparison.csv")
@@ -2306,7 +2367,7 @@ def render_model_insights():
             show_table(view)
             cv = notebook_output("model_comparison.csv")
             if cv is not None:
-                st.caption("Three-fold stratified cross-validation on 120,000 training records (Section 7.4), "
+                st.caption("Three-fold stratified cross-validation on 120,000 training records, "
                            "including the no-skill baseline:")
                 cv_view = cv.drop(columns=[c for c in ["Run time (seconds)"] if c in cv]).copy()
                 for column in ["Macro-F1", "Macro-F1 variation", "Balanced accuracy", "Weighted F1", "Overall accuracy"]:

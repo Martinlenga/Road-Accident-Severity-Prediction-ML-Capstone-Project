@@ -1,0 +1,8 @@
+# Give native Streamlit controls the same light palette as the dashboard CSS.
+# This does not alter application logic, filters, charts or model predictions.
+[theme]
+base = "light"
+primaryColor = "#5673C7"
+backgroundColor = "#F3F4FF"
+secondaryBackgroundColor = "#FFFCFA"
+textColor = "#26334B"
