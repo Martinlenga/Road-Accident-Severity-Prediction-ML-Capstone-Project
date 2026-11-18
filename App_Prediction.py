@@ -101,7 +101,7 @@ def stretch(widget) -> dict:
 
 MISSING = "Data missing or out of range"
 SEVERITY_ORDER = ["Fatal", "Serious", "Slight"]
-SEVERITY_COLOURS = {"Fatal": "#FF5C70", "Serious": "#FFB547", "Slight": "#35C6A5"}
+SEVERITY_COLOURS = {"Fatal": "#C84E65", "Serious": "#C08B33", "Slight": "#299B83"}
 
 STATS19_LABELS: dict[str, dict[int, str]] = {
     "collision_severity": {1: "Fatal", 2: "Serious", 3: "Slight"},
@@ -294,23 +294,25 @@ def label_codes(series: pd.Series, field: str, unknown: str = "Unknown") -> pd.S
 
 
 # =============================================================================
-# 3. GLOBAL VISUAL DESIGN
+# 3. GLOBAL VISUAL DESIGN — IRIS & COASTAL MIST (LIGHT)
+# Only the presentation layer changes: the original data, state, charts,
+# form inputs, sidebar navigation and prediction behaviour are untouched.
 # =============================================================================
 
-INK = "#EAF1FA"
-MUTED = "#9AAAC0"
-BG = "#1E2733"
-PANEL = "#263241"
-PANEL_ALT = "#2E3B4C"
-BORDER = "#425166"
-BLUE = "#66A6FF"
-TEAL = "#35C6A5"
-AMBER = "#F4B860"
-RED = "#F06C79"
-PURPLE = "#B39DDB"
-GREEN = "#77C98B"
-CORAL = "#F28C68"
-CYAN = "#63C7D8"
+INK = "#26334B"
+MUTED = "#63728A"
+BG = "#F3F4FF"
+PANEL = "#FBF9FF"
+PANEL_ALT = "#EEF5FC"
+BORDER = "#D6DCEE"
+BLUE = "#5673C7"
+TEAL = "#187F81"
+AMBER = "#B67B28"
+RED = "#CB5267"
+PURPLE = "#7B64B9"
+GREEN = "#419377"
+CORAL = "#D47C68"
+CYAN = "#3B90A7"
 YEAR_PALETTE = [BLUE, TEAL, AMBER, PURPLE, RED, CYAN, CORAL, GREEN]
 HYPOTHESIS_COLOURS = {
     "H1 Road and environment": BLUE,
@@ -324,105 +326,403 @@ st.markdown(
     <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
 
+    /* Creative LIGHT palette. Using tinted surfaces, rather than a white canvas. */
     :root {{
-      color-scheme: dark;
-      --bg: {BG}; --panel: {PANEL}; --panel2: {PANEL_ALT};
-      --ink: {INK}; --muted: {MUTED}; --border: {BORDER};
-      --blue: {BLUE}; --teal: {TEAL}; --amber: {AMBER}; --red: {RED};
+      color-scheme: light !important;
+      --bg: {BG};
+      --panel: {PANEL};
+      --panel2: {PANEL_ALT};
+      --ink: {INK};
+      --muted: {MUTED};
+      --border: {BORDER};
+      --blue: {BLUE};
+      --teal: {TEAL};
+      --amber: {AMBER};
+      --red: {RED};
+      --lavender: #EEE9FC;
+      --aqua: #E3F5F3;
+      --peach: #FFF0E7;
+      --focus: rgba(86,115,199,.22);
+      --soft-shadow: 0 12px 32px rgba(64,67,120,.07), 0 2px 6px rgba(60,70,120,.035);
     }}
-    html, body, [class*="css"], [data-testid="stAppViewContainer"] {{
+    html, body, [data-testid="stAppViewContainer"] {{
       font-family: 'DM Sans', sans-serif !important;
-      background: {BG} !important;
+      color: {INK} !important;
+      color-scheme: light !important;
+    }}
+    html, body {{ background: {BG} !important; }}
+    .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {{
+      background:
+        radial-gradient(ellipse 58% 44% at 90% 4%, rgba(209,197,249,.41), transparent 75%),
+        radial-gradient(ellipse 40% 45% at 0% 65%, rgba(185,230,226,.36), transparent 77%),
+        radial-gradient(ellipse 38% 32% at 88% 93%, rgba(251,219,207,.30), transparent 78%),
+        linear-gradient(125deg, #F5F3FF 0%, #EDF6FC 54%, #FBF3F6 100%) !important;
       color: {INK} !important;
     }}
-    .stApp {{ background: {BG} !important; }}
-    [data-testid="stHeader"] {{ background: rgba(30,39,51,.92) !important; }}
+    [data-testid="stHeader"] {{
+      background: linear-gradient(90deg,rgba(245,244,255,.82),rgba(242,247,252,.78)) !important;
+      backdrop-filter: blur(17px);
+      border-bottom: 1px solid rgba(208,216,238,.4);
+    }}
     [data-testid="stToolbar"] {{ right: 1rem; }}
-    .block-container {{ max-width: 1600px; padding-top: 1.35rem; padding-bottom: 3rem; }}
-    h1,h2,h3,h4,h5,p,li,label {{ color: {INK}; }}
-    h1,h2,h3 {{ font-family: 'Space Grotesk', sans-serif !important; letter-spacing: -.035em; }}
-    h1 {{ font-size: clamp(2rem, 3vw, 2.8rem) !important; font-weight: 700 !important; }}
-    h2 {{ font-size: 1.55rem !important; }}
-    h3 {{ font-size: 1.12rem !important; }}
-    p, .stMarkdown, [data-testid="stCaptionContainer"] {{ color: {MUTED}; }}
-    [data-testid="stSidebar"] {{ background: linear-gradient(180deg,#243040 0%,#1E2733 100%) !important; border-right: 1px solid {BORDER}; }}
-    [data-testid="stSidebar"] [data-testid="stVerticalBlock"] {{ gap: .72rem; }}
-    [data-testid="stSidebar"] [data-testid="stRadio"] label {{ padding: 8px 10px; border-radius: 9px; }}
-    [data-testid="stSidebar"] [data-testid="stRadio"] label:hover {{ background: rgba(99,199,216,.10); }}
-    [data-testid="stSidebar"] [data-baseweb="select"] > div {{ border:1px solid {BORDER} !important; border-radius:10px !important; }}
-    [data-baseweb="popover"] [role="listbox"], [data-baseweb="menu"] {{ background:{PANEL_ALT} !important; }}
-    [data-baseweb="popover"] [role="option"] {{ color:{INK} !important; }}
-    [data-testid="stSidebar"] * {{ color: {INK} !important; }}
-    [data-testid="stSidebar"] [data-baseweb="select"] > div,
-    [data-testid="stSidebar"] input,
-    [data-testid="stSidebar"] textarea {{ background: {PANEL_ALT} !important; color: {INK} !important; }}
-    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {{ color: {MUTED} !important; }}
-    [data-testid="stMetric"] {{ min-height:118px; display:flex; flex-direction:column; justify-content:center;
-      background: linear-gradient(145deg, {PANEL_ALT}, {PANEL}) !important;
-      border: 1px solid {BORDER} !important; border-radius: 14px !important;
-      padding: 16px 18px !important;
+    .block-container {{ max-width:1600px; padding-top:1.35rem; padding-bottom:3rem; }}
+    h1,h2,h3,h4,h5,p,li,label {{ color:{INK}; }}
+    h1,h2,h3 {{ font-family:'Space Grotesk',sans-serif !important; letter-spacing:-.035em; }}
+    h1 {{ font-size:clamp(2rem,3vw,2.8rem) !important; font-weight:700 !important;
+      background:linear-gradient(105deg,#273755 5%,#586DB9 58%,#7B64B9 100%);
+      -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
     }}
-    [data-testid="stMetricLabel"] p {{ color: {MUTED} !important; font-size: .78rem !important; }}
-    [data-testid="stMetricValue"] {{ color: {INK} !important; font-family: 'Space Grotesk',sans-serif; }}
-    [data-testid="stMetricDelta"] {{ color: {TEAL} !important; }}
+    h2 {{ font-size:1.55rem !important; }}
+    h3 {{ font-size:1.12rem !important; }}
+    p, .stMarkdown, [data-testid="stCaptionContainer"] {{ color:{MUTED}; }}
+    hr, [data-testid="stDivider"] {{ border-color: {BORDER} !important; }}
+    a {{ color:{BLUE}; }}
+
+    /* The sidebar is a lilac + sea-glass surface, with its own warm depth. */
+    [data-testid="stSidebar"], [data-testid="stSidebarContent"] {{
+      background:linear-gradient(168deg,#E7E9FC 0%,#F2EAFE 48%,#E8F5F4 100%) !important;
+      border-right:1px solid #D5D8EC !important;
+    }}
+    [data-testid="stSidebar"] [data-testid="stVerticalBlock"] {{ gap:.72rem; }}
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {{ color:{MUTED} !important; }}
+    [data-testid="stSidebar"] [data-testid="stRadio"] label {{
+      padding:9px 11px; border-radius:11px; transition:background .17s ease,border-color .17s ease;
+      border:1px solid transparent; color:{INK} !important;
+    }}
+    [data-testid="stSidebar"] [data-testid="stRadio"] label:hover {{
+      background:rgba(255,255,255,.54) !important; border-color:rgba(115,116,181,.14);
+    }}
+    [data-testid="stSidebar"] [data-testid="stRadio"] label:has(input:checked),
+    [data-testid="stSidebar"] [data-testid="stRadio"] label:has([aria-checked="true"]) {{
+      background:linear-gradient(115deg,#DCE4FC,#E5F3F4) !important;
+      border-color:#C7D3F4 !important;
+      box-shadow:0 4px 12px rgba(91,101,164,.10);
+      font-weight:700;
+    }}
+    [data-testid="stSidebar"] [data-testid="stRadio"] label p,
+    [data-testid="stSidebar"] [data-testid="stRadio"] label span {{ color:{INK} !important; }}
+    [data-testid="stSidebar"] [data-testid="stExpander"] {{
+      background:rgba(251,249,255,.76) !important; border-color:#D9D9EE !important;
+    }}
+
+    /* Tinted KPI tiles, floating report panels, and chart framing. */
+    [data-testid="stMetric"] {{
+      min-height:118px; display:flex; flex-direction:column; justify-content:center;
+      background:linear-gradient(140deg,#FEFAFF 0%,#EEF2FF 66%,#EAF7F5 100%) !important;
+      border:1px solid {BORDER} !important; border-top:3px solid #9480D6 !important;
+      border-radius:16px !important; padding:16px 18px !important;
+      box-shadow:var(--soft-shadow);
+    }}
+    [data-testid="stMetricLabel"] p {{ color:{MUTED} !important; font-size:.78rem !important; }}
+    [data-testid="stMetricValue"] {{ color:{INK} !important; font-family:'Space Grotesk',sans-serif; }}
+    [data-testid="stMetricDelta"] {{ color:{TEAL} !important; }}
     [data-testid="stVerticalBlockBorderWrapper"] {{
-      background: {PANEL} !important; border: 1px solid {BORDER} !important;
-      border-radius: 16px !important;
+      background:linear-gradient(155deg,rgba(252,249,255,.96),rgba(242,247,254,.97)) !important;
+      border:1px solid {BORDER} !important; border-radius:17px !important;
+      box-shadow:var(--soft-shadow);
     }}
-    [data-testid="stExpander"] {{ background: {PANEL} !important; border: 1px solid {BORDER} !important; border-radius: 12px !important; }}
-    [data-testid="stAlert"] {{ border-radius: 12px !important; }}
+    [data-testid="stExpander"] {{
+      background:linear-gradient(145deg,#FBF9FF,#F0F6FE) !important;
+      border:1px solid {BORDER} !important; border-radius:13px !important;
+      box-shadow:0 3px 10px rgba(63,79,128,.035);
+    }}
+    [data-testid="stExpander"] details summary, [data-testid="stExpander"] summary,
+    [data-testid="stExpander"] summary p {{ color:{INK} !important; }}
+    [data-testid="stExpander"] summary:hover {{ background:rgba(221,230,252,.28); border-radius:12px; }}
+    [data-testid="stAlert"] {{ border-radius:12px !important; }}
     [data-testid="stDataFrame"], [data-testid="stTable"] {{
-      background: {PANEL} !important; border: 1px solid {BORDER}; border-radius: 12px;
+      background:{PANEL} !important; border:1px solid {BORDER} !important;
+      border-radius:12px; box-shadow:0 5px 16px rgba(64,75,122,.035);
     }}
-    [data-baseweb="tab-list"] {{ gap: 8px; background: transparent; }}
-    button[data-baseweb="tab"] {{ color: {MUTED} !important; background: {PANEL} !important; border-radius: 10px 10px 0 0; }}
-    button[data-baseweb="tab"][aria-selected="true"] {{ color: {TEAL} !important; border-bottom: 2px solid {TEAL} !important; }}
-    .section-kicker {{ color: {TEAL}; font-size: .68rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; margin-bottom: 4px; }}
-    .section-title {{ color: {INK}; font-family: 'Space Grotesk',sans-serif; font-size: 1.55rem; font-weight: 700; margin: 0 0 4px; }}
-    .coverage {{ color: {MUTED}; font-size: .86rem; margin: -0.9rem 0 1.4rem; line-height: 1.6; }}
-    .coverage b {{ color: {INK}; font-weight: 700; }}
-    .panel-heading {{ margin: 0 0 16px; width:100%; box-sizing:border-box; }}
-    .panel-title {{ color: {INK}; font-family: 'Space Grotesk',sans-serif; font-size: 1rem; font-weight: 650; line-height: 1.35; margin: 0 0 7px; }}
-    .panel-note {{ color: {MUTED}; font-size: .76rem; line-height: 1.5; margin: 0; }}
-    .form-group-title {{ color: {TEAL}; font-size: .72rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; margin: 6px 0 2px; }}
+    [data-testid="stVegaLiteChart"], [data-testid="stAltairChart"] {{
+      border-radius:13px; overflow:hidden; background:{PANEL};
+    }}
+
+    /* Tabs — pressed / selected states are periwinkle, never dark grey. */
+    [data-baseweb="tab-list"] {{ gap:8px; background:transparent !important; }}
+    button[data-baseweb="tab"] {{
+      color:{MUTED} !important; background:#EDEDFB !important;
+      border:1px solid #E0DFF1 !important; border-radius:10px 10px 0 0;
+      transition:background .17s ease,color .17s ease;
+    }}
+    button[data-baseweb="tab"]:hover {{ background:#E3EAFD !important; color:{INK} !important; }}
+    button[data-baseweb="tab"][aria-selected="true"] {{
+      color:#465FB0 !important; background:#FBF9FF !important;
+      border-bottom:2px solid {BLUE} !important; font-weight:700;
+    }}
+
+    /* Typography and custom report blocks used across all existing pages. */
+    .section-kicker {{ color:{TEAL}; font-size:.68rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; margin-bottom:4px; }}
+    .section-title {{ color:{INK}; font-family:'Space Grotesk',sans-serif; font-size:1.55rem; font-weight:700; margin:0 0 4px; }}
+    .coverage {{ color:{MUTED}; font-size:.86rem; margin:-.9rem 0 1.4rem; line-height:1.6; }}
+    .coverage b {{ color:{INK}; font-weight:700; }}
+    .panel-heading {{ margin:0 0 16px; width:100%; box-sizing:border-box; }}
+    .panel-title {{ color:{INK}; font-family:'Space Grotesk',sans-serif; font-size:1rem; font-weight:650; line-height:1.35; margin:0 0 7px; }}
+    .panel-note {{ color:{MUTED}; font-size:.76rem; line-height:1.5; margin:0; }}
+    .form-group-title {{ color:{TEAL}; font-size:.72rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; margin:6px 0 2px; }}
     .notice {{
-      background: rgba(255,181,71,.09); border: 1px solid rgba(255,181,71,.38);
-      border-left: 4px solid {AMBER}; border-radius: 12px; color: #FFE0A6;
-      padding: 13px 16px; font-size: .82rem; line-height: 1.55; margin: 12px 0 18px;
+      background:linear-gradient(100deg,#FFF2DF,#FFF6EC) !important;
+      border:1px solid #EBCFA7; border-left:4px solid {AMBER};
+      border-radius:12px; color:#805421 !important;
+      padding:13px 16px; font-size:.82rem; line-height:1.55; margin:12px 0 18px;
     }}
-    .findings {{ background: {PANEL}; border: 1px solid {BORDER}; border-radius: 14px; padding: 14px 18px; margin: 0 0 1.6rem; }}
-    .findings li {{ color: #C9D5E3; font-size: .86rem; line-height: 1.6; }}
-    .findings .caution {{ color: {MUTED}; font-size: .74rem; margin-top: 6px; }}
-    .result-card {{ background: linear-gradient(135deg,#263A3A,#202B37); border:1px solid {BORDER}; border-radius:16px; padding:20px 22px; }}
+    .findings {{
+      background:linear-gradient(116deg,#F8F6FF,#ECF6F4) !important;
+      border:1px solid {BORDER}; border-radius:14px; padding:14px 18px; margin:0 0 1.6rem;
+      box-shadow:0 4px 16px rgba(74,90,138,.035);
+    }}
+    .findings li {{ color:#3E526E; font-size:.86rem; line-height:1.6; }}
+    .findings .caution {{ color:{MUTED}; font-size:.74rem; margin-top:6px; }}
+    .result-card {{
+      background:linear-gradient(135deg,#E9F5F3 0%,#F2EDFF 100%) !important;
+      border:1px solid {BORDER}; border-radius:16px; padding:20px 22px;
+      box-shadow:var(--soft-shadow);
+    }}
     .result-label {{ color:{MUTED}; font-size:.72rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }}
     .result-value {{ font-family:'Space Grotesk',sans-serif; font-size:2.2rem; font-weight:700; margin-top:5px; }}
     .small-muted {{ color:{MUTED}; font-size:.76rem; }}
     .filter-caption {{ color:{MUTED}; font-size:.72rem; line-height:1.45; }}
     .footer {{ border-top:1px solid {BORDER}; margin-top:38px; padding-top:16px; color:{MUTED}; font-size:.74rem; }}
-    div.stButton > button[kind="primary"], button[kind="primary"] {{
-      background: {TEAL} !important; color: #062018 !important; border: 0 !important; font-weight: 800 !important;
-      border-radius: 10px !important;
+
+    /* DROPDOWN SYSTEM — porcelain controls with lilac rails and sea-glass selections.
+       Kept as native Streamlit widgets: no changes to choices, state or callbacks. */
+    [data-baseweb="select"] > div,
+    [data-baseweb="input"] > div,
+    [data-baseweb="textarea"] > div,
+    [data-testid="stTextInput"] input,
+    [data-testid="stNumberInput"] input,
+    [data-testid="stTextArea"] textarea,
+    [data-testid="stDateInput"] input,
+    [data-testid="stTimeInput"] input {{
+      background:#FFFCFA !important;
+      color:{INK} !important;
+      border-color:#D7C9E8 !important;
+      border-radius:13px !important;
+      color-scheme:light !important;
     }}
-    div.stButton > button {{
-      border: 1px solid {BORDER} !important; border-radius: 10px !important;
-      color: {INK} !important; background: {PANEL_ALT} !important;
+    [data-baseweb="select"] > div {{
+      background:linear-gradient(100deg,#FFFCF8 0%,#FBF9FF 100%) !important;
+      border:1px solid #D4C8E5 !important;
+      border-left:4px solid #AA95D3 !important;
+      border-radius:13px !important;
+      min-height:44px;
+      box-shadow:0 3px 11px rgba(108,85,147,.065) !important;
+      transition:border-color .2s ease,box-shadow .2s ease,background .2s ease;
+    }}
+    [data-baseweb="select"] > div:hover {{
+      border-color:#B7A4D7 !important;
+      border-left-color:#8B76BE !important;
+      box-shadow:0 5px 16px rgba(108,85,147,.105) !important;
+    }}
+    [data-baseweb="select"] > div:focus-within {{
+      background:#FFFDFC !important;
+      border-color:#8DB9AF !important;
+      border-left-color:#50978C !important;
+      box-shadow:0 0 0 3px rgba(105,172,157,.15),0 6px 17px rgba(102,133,145,.08) !important;
+    }}
+    [data-baseweb="input"] > div:focus-within,
+    [data-baseweb="textarea"] > div:focus-within {{
+      border-color:#8DB9AF !important;
+      box-shadow:0 0 0 3px rgba(105,172,157,.15) !important;
+    }}
+    [data-baseweb="select"] input,
+    [data-baseweb="input"] input,
+    [data-baseweb="textarea"] textarea,
+    [data-baseweb="select"] [role="combobox"],
+    [data-testid="stForm"] input,
+    [data-testid="stForm"] textarea,
+    input, textarea {{
+      color:{INK} !important;
+      caret-color:#50978C !important;
+      color-scheme:light !important;
+    }}
+    [data-baseweb="select"] input,
+    [data-baseweb="input"] input,
+    [data-baseweb="textarea"] textarea {{ background:transparent !important; }}
+    input::placeholder, textarea::placeholder,
+    [data-baseweb="select"] input::placeholder,
+    [data-baseweb="input"] input::placeholder {{
+      color:#8D869D !important; opacity:1 !important;
+    }}
+    [data-baseweb="select"] svg {{
+      fill:#927EAF !important; color:#927EAF !important;
+    }}
+    [data-testid="stWidgetLabel"] p,
+    [data-testid="stWidgetLabel"] label,
+    [data-testid="stForm"] label {{ color:{INK} !important; font-weight:600 !important; }}
+    [data-testid="stNumberInput"] button,
+    [data-baseweb="input"] button {{
+      background:#F0EAF9 !important; color:{INK} !important;
+      border-color:#D7C9E8 !important;
+    }}
+    [data-testid="stNumberInput"] button:hover,
+    [data-baseweb="input"] button:hover {{ background:#E8DCF5 !important; }}
+    [data-testid="stSlider"] [role="slider"] {{ background:#6477C8 !important; }}
+
+    /* Rounded sea-glass chips instead of flat blue multi-select rectangles. */
+    [data-baseweb="tag"] {{
+      background:linear-gradient(110deg,#E0F1EB,#E7F4ED) !important;
+      border:1px solid #ACD4C7 !important;
+      border-radius:100px !important;
+      color:#2D7168 !important;
+      padding-inline:3px !important;
+    }}
+    [data-baseweb="tag"] span,
+    [data-baseweb="tag"] button,
+    [data-baseweb="tag"] svg {{ color:#2D7168 !important; fill:#2D7168 !important; }}
+    [data-baseweb="tag"] button:hover {{
+      background:#C4E7D9 !important; border-radius:100px !important;
+    }}
+
+    /* OPEN DROPDOWN LISTS — fully light, including all portalled BaseWeb layers.
+       Use an opaque background all the way down to the options so the app's
+       underlying Streamlit theme can never show through the menu or corners.
+       Widget data, selection state, navigation and callbacks remain unchanged. */
+    [data-baseweb="popover"]:has([role="listbox"]),
+    [data-baseweb="popover"]:has([data-baseweb="menu"]),
+    [data-baseweb="popover"]:has([role="option"]) {{
+      background:#FFFCFA !important;
+      background-color:#FFFCFA !important;
+      background-image:none !important;
+      color:{INK} !important;
+      color-scheme:light !important;
+      border:1px solid #D8D5E8 !important;
+      border-radius:8px !important;
+      box-shadow:0 12px 30px rgba(73,79,126,.12) !important;
+      overflow:hidden !important;
+    }}
+    /* BaseWeb's scroll, list and menu wrappers can inherit a dark surface
+       even when the outer popover is light. Set every wrapper explicitly. */
+    [data-baseweb="popover"]:has([role="listbox"]) > div,
+    [data-baseweb="popover"]:has([data-baseweb="menu"]) > div,
+    [data-baseweb="popover"]:has([role="option"]) > div,
+    [data-baseweb="popover"] [data-baseweb="menu"],
+    [data-baseweb="popover"] [role="listbox"],
+    [data-baseweb="popover"] ul,
+    [data-baseweb="popover"] [role="listbox"] > div,
+    [data-baseweb="popover"] [data-baseweb="menu"] > div,
+    [data-baseweb="menu"],
+    [data-baseweb="menu"] > div,
+    [data-baseweb="menu"] ul,
+    [role="listbox"],
+    [role="listbox"] > div {{
+      background:#FFFCFA !important;
+      background-color:#FFFCFA !important;
+      background-image:none !important;
+      color:{INK} !important;
+      color-scheme:light !important;
+      border-color:transparent !important;
+      border-radius:0 !important;
+      box-shadow:none !important;
+      scrollbar-color:#CFCEE0 #FFFCFA;
+    }}
+    /* OPAQUE flat rows: never transparent over a dark underlying widget. */
+    [data-baseweb="popover"] [role="option"],
+    [data-baseweb="menu"] [role="option"],
+    [data-baseweb="menu"] li,
+    [role="listbox"] [role="option"] {{
+      background:#FFFCFA !important;
+      background-color:#FFFCFA !important;
+      background-image:none !important;
+      border:0 !important;
+      border-radius:0 !important;
+      box-shadow:none !important;
+      color:{INK} !important;
+      min-height:38px;
+      margin:0 !important;
+      padding:10px 14px !important;
+      font-weight:500;
+      transition:background-color .12s ease,color .12s ease;
+    }}
+    [data-baseweb="popover"] [role="option"] *,
+    [data-baseweb="menu"] [role="option"] *,
+    [role="listbox"] [role="option"] * {{ color:inherit !important; }}
+    [data-baseweb="popover"] [role="option"]:hover,
+    [data-baseweb="menu"] [role="option"]:hover,
+    [data-baseweb="menu"] li:hover,
+    [role="listbox"] [role="option"]:hover,
+    [role="option"][data-highlighted="true"],
+    [role="option"][aria-current="true"] {{
+      background:#EEEFFD !important;
+      background-color:#EEEFFD !important;
+      color:#4D5C98 !important;
+    }}
+    [data-baseweb="popover"] [role="option"][aria-selected="true"],
+    [data-baseweb="menu"] [role="option"][aria-selected="true"],
+    [role="listbox"] [role="option"][aria-selected="true"],
+    [role="listbox"] [role="option"][aria-checked="true"] {{
+      background:#E5F3EF !important;
+      background-color:#E5F3EF !important;
+      color:#286F65 !important;
+      box-shadow:inset 3px 0 0 #68AC9E !important;
+      font-weight:650;
+    }}
+    [data-baseweb="popover"] input,
+    [data-baseweb="menu"] input {{
+      background:#FFFCFA !important;
+      color:{INK} !important;
+      color-scheme:light !important;
+    }}
+
+    /* Forms: slightly warm lavender surfaces instead of black inner controls. */
+    [data-testid="stForm"] {{
+      border:1px solid #D3D7EC !important; border-radius:16px !important;
+      padding:20px; background:linear-gradient(145deg,#FBF8FF,#EDF7F8) !important;
+      box-shadow:var(--soft-shadow);
+    }}
+    [data-testid="stForm"] [data-baseweb="input"] > div,
+    [data-testid="stForm"] [data-baseweb="textarea"] > div {{
+      background:#FFFCFA !important; color:{INK} !important;
+      border:1px solid #D7C9E8 !important; border-radius:13px !important;
+    }}
+    [data-testid="stForm"] [data-baseweb="select"] svg {{ fill:#927EAF !important; }}
+
+    /* Buttons are colourful without returning to the dark-theme look. */
+    div.stButton > button,
+    div[data-testid="stDownloadButton"] button,
+    [data-testid="stFormSubmitButton"] button {{
+      border:1px solid #C8D5EA !important; border-radius:11px !important;
+      color:{INK} !important; background:linear-gradient(112deg,#FDFBFF,#EAF1FD) !important;
+      font-weight:650 !important; box-shadow:0 3px 8px rgba(68,83,138,.05);
+      transition:background .18s ease,box-shadow .18s ease,transform .18s ease;
+    }}
+    div.stButton > button:hover,
+    [data-testid="stFormSubmitButton"] button:hover {{
+      border-color:#98AADB !important; background:#E4EDFF !important;
+      box-shadow:0 5px 14px rgba(65,81,144,.10);
+    }}
+    div.stButton > button[kind="primary"],
+    button[kind="primary"],
+    [data-testid="stFormSubmitButton"] button[kind="primary"] {{
+      background:linear-gradient(115deg,#5A68BB,#298E99) !important;
+      border:1px solid #5975BA !important; color:#FFFFFF !important;
+      font-weight:800 !important; box-shadow:0 7px 18px rgba(67,111,171,.18);
+    }}
+    div.stButton > button[kind="primary"]:hover,
+    button[kind="primary"]:hover {{
+      background:linear-gradient(115deg,#4B5CAA,#1B7D88) !important;
+      box-shadow:0 9px 22px rgba(67,111,171,.22);
     }}
     div[data-testid="stDownloadButton"] button {{
-      background: linear-gradient(135deg, #14b8a6, #0f766e) !important; color: white !important;
-      border: 1px solid rgba(20,184,166,.4) !important; border-radius: 10px !important;
-      padding: .65rem 1.2rem; font-weight: 600; transition: all .25s ease-in-out;
+      background:linear-gradient(115deg,#F7DCCF 0%,#EAC9DF 100%) !important;
+      color:#604467 !important;
+      border:1px solid #D9AFC9 !important;
+      border-radius:12px !important;
+      padding:.68rem 1.25rem !important;
+      font-weight:750 !important;
+      box-shadow:0 6px 16px rgba(151,91,123,.11) !important;
     }}
     div[data-testid="stDownloadButton"] button:hover {{
-      background: linear-gradient(135deg, #2dd4bf, #0d9488) !important; border-color: #5eead4 !important;
-      transform: translateY(-2px); box-shadow: 0 6px 18px rgba(20,184,166,.25);
+      background:linear-gradient(115deg,#F2CABB 0%,#DFB4D1 100%) !important;
+      color:#4E3556 !important;
+      border-color:#C994B4 !important;
+      transform:translateY(-1px);
+      box-shadow:0 9px 18px rgba(151,91,123,.17) !important;
     }}
-    [data-testid="stForm"] {{ border:1px solid {BORDER}; border-radius:14px; padding:20px; background:{PANEL} !important; }}
-    [data-testid="stForm"] label {{ color:{INK} !important; font-weight:600 !important; }}
-    [data-testid="stForm"] [data-baseweb="select"] > div,
-    [data-testid="stForm"] input,
-    [data-testid="stForm"] textarea {{ background:#0D141D !important; color:#F3F7FC !important; border:1px solid #64758A !important; border-radius:9px !important; }}
-    [data-testid="stForm"] [data-baseweb="select"] svg {{ fill:#DCE7F4 !important; }}
-    input, textarea {{ color: {INK} !important; }}
+    button:focus-visible, input:focus-visible, [role="option"]:focus-visible {{
+      outline:3px solid var(--focus) !important; outline-offset:2px !important;
+    }}
+
     /* Responsive layout: ordinary chart/form columns stack on phones.
        KPI columns have their own grid so the six cards remain compact. */
     [data-testid="stHorizontalBlock"] {{ align-items:stretch; gap:1.15rem; min-width:0; }}
@@ -889,7 +1189,8 @@ def severity_donut(df: pd.DataFrame):
     show_chart(chart)
 
 
-def bar_chart(df, category, value, title, colour=BLUE, horizontal=False, order=None, value_title="Records"):
+def bar_chart(df, category, value, title, colour=BLUE, horizontal=False, order=None, value_title="Records",
+              height: int = 340):
     panel(title)
     if df.empty:
         return empty_state("No records are available for this chart.")
@@ -905,10 +1206,11 @@ def bar_chart(df, category, value, title, colour=BLUE, horizontal=False, order=N
         tooltip=[alt.Tooltip(f"{category}:N", title="Category"),
                  alt.Tooltip(f"{value}:Q", title=value_title, format=",")],
     )
-    show_chart(chart)
+    show_chart(chart, height=height)
 
 
-def stacked_severity_chart(frame, category, title, sort=None, severity_col="severity_label", value_title="Share"):
+def stacked_severity_chart(frame, category, title, sort=None, severity_col="severity_label", value_title="Share",
+                           height: int | None = None):
     """Within-category severity composition (100% stacked bars)."""
     panel(title)
     counts = frame.groupby([category, severity_col], observed=True).size().reset_index(name="Count")
@@ -929,7 +1231,7 @@ def stacked_severity_chart(frame, category, title, sort=None, severity_col="seve
         order=alt.Order("Stack:Q"),
         tooltip=["Category:N", "Severity:N", alt.Tooltip("Count:Q", title="Records", format=",")],
     )
-    show_chart(chart, height=max(300, min(520, 34 * len(order) + 90)))
+    show_chart(chart, height=height if height is not None else max(300, min(520, 34 * len(order) + 90)))
 
 
 def severe_share_table(df: pd.DataFrame, column: str, min_records: int = 250) -> tuple[pd.DataFrame, int]:
@@ -1240,7 +1542,12 @@ def render_overview():
             # Coordinates are stored as float32 to save memory; st.map serialises
             # its default view with json, which rejects numpy float32 values.
             geo = geo.sort_values("order").astype({"latitude": "float64", "longitude": "float64"})
-            st.map(geo, latitude="latitude", longitude="longitude", color="color", size=60)
+            # Streamlit converts CSS colour strings to RGBA tuples in-place.
+            # pandas string dtype rejects this, so give its colour column a
+            # plain object dtype before passing the unchanged map coordinates.
+            geo["color"] = geo["color"].astype(object)
+            st.map(geo[["latitude", "longitude", "color"]].copy(),
+                   latitude="latitude", longitude="longitude", color="color", size=60)
             st.caption("Colour = severity: green Slight, amber Serious, red Fatal. Coordinates are for description "
                        "only and are not model inputs (notebook Section 4.9).")
 
@@ -1277,7 +1584,7 @@ def render_collision_analytics():
         show_chart(chart)
 
     panel("Serious/Fatal share by road and environment factor",
-          "Within-category share of collisions that were Serious or Fatal, as in notebook Sections 4.4–4.5. "
+          "Within-category share of collisions that were Serious or Fatal. "
           "Categories with fewer than 250 collisions in the current selection are hidden.")
     c1, c2 = st.columns([1, 1])
     with c1:
@@ -1323,15 +1630,17 @@ def render_collision_analytics():
 
 def render_road_users():
     section_heading("Road Users")
+    road_users_chart_height = 460  # visual consistency, Road Users page only
     if filtered_casualties.empty:
         return empty_state("No casualty records are linked to the current collision selection.")
     c1, c2 = st.columns(2, gap="large")
     with c1:
         users = count_frame(filtered_casualties["user_type"], "Road user", "Casualties")
-        bar_chart(users, "Road user", "Casualties", "Casualties by road-user group", colour=TEAL, horizontal=True)
+        bar_chart(users, "Road user", "Casualties", "Casualties by road-user group", colour=TEAL,
+                  horizontal=True, height=road_users_chart_height)
     with c2:
         stacked_severity_chart(filtered_casualties, "age_band_label", "Severity by casualty age band",
-                               sort=AGE_BAND_ORDER)
+                               sort=AGE_BAND_ORDER, height=road_users_chart_height)
     user_ksi = (filtered_casualties.groupby("user_type", observed=True)
                 .agg(Casualties=("is_ksi", "size"), KSI=("is_ksi", "sum")).reset_index())
     user_ksi["KSI share (%)"] = user_ksi["KSI"] / user_ksi["Casualties"] * 100
@@ -1349,9 +1658,9 @@ def render_road_users():
                 tooltip=[alt.Tooltip("user_type:N", title="Road user"), alt.Tooltip("Casualties:Q", format=","),
                          alt.Tooltip("KSI:Q", format=","), alt.Tooltip("KSI share (%):Q", format=".1f")],
             )
-            show_chart(chart)
+            show_chart(chart, height=road_users_chart_height)
     with c2:
-        stacked_severity_chart(filtered_casualties, "casualty_class_label", "Severity by casualty class")
+        stacked_severity_chart(filtered_casualties, "casualty_class_label", "Severity by casualty class", height=road_users_chart_height)
     st.caption("Casualty fields were analysed separately from the collision model because casualty "
                "severity reveals the collision outcome (notebook cleaning register).")
 
@@ -1373,7 +1682,7 @@ def residual_category_label(predictor: str, category) -> str:
 
 def render_statistical_evidence():
     section_heading("Statistical Evidence")
-    st.caption(f"Results from {NOTEBOOK_NAME} (Sections 3, 5 and 6.2), computed on every collision, vehicle and "
+    st.caption(f"Results from {NOTEBOOK_NAME}, computed on every collision, vehicle and "
                f"casualty record for {year_span(ALL_YEARS)}. The sidebar filters do not change these results.")
 
     quality = notebook_output("data_quality_summary.csv")
@@ -1431,7 +1740,7 @@ def render_statistical_evidence():
     left, right = st.columns([1.15, 1], gap="large")
     with left:
         panel("Standardised residuals for the three strongest H1 predictors",
-              "Positive = more collisions of that severity than expected under independence (notebook Section 5.4).")
+              "Positive = more collisions of that severity than expected under independence.")
         if residuals is None:
             missing_output("standardized_residuals_top_associations.csv")
         else:
@@ -1458,7 +1767,7 @@ def render_statistical_evidence():
         numeric = notebook_output("numeric_severity_group_tests.csv")
         pairwise = notebook_output("numeric_pairwise_posthoc_tests.csv")
         panel("Numeric variables across severity groups",
-              "Kruskal-Wallis tests (Section 5.5) and corrected pairwise Mann-Whitney tests (Section 5.6).")
+              "Kruskal-Wallis tests and corrected pairwise Mann-Whitney tests.")
         if numeric is None:
             missing_output("numeric_severity_group_tests.csv")
         else:
@@ -1476,7 +1785,7 @@ def render_statistical_evidence():
             view["Significant after correction"] = view["Significant after correction"].map({True: "Yes", False: "No"})
             show_table(view)
 
-    with st.expander("Data quality and cleaning decisions (notebook Sections 3.5–3.10)"):
+    with st.expander("Data quality and cleaning decisions"):
         integrity = notebook_output("structural_integrity_checks.csv")
         cleaning = notebook_output("cleaning_decision_register.csv")
         for frame in (integrity, quality, cleaning):
@@ -1874,7 +2183,7 @@ def render_prediction():
 # =============================================================================
 
 def hypotheses_h5_to_h7() -> pd.DataFrame | None:
-    """Re-derive the notebook's H5-H7 conclusions from its saved tables (Section 10.3)."""
+    """Re-derive the notebook's H5-H7 conclusions from its saved tables."""
     cv = notebook_output("model_comparison.csv")
     register = notebook_output("model_register.csv")
     if cv is None or register is None or "Role" not in cv:
@@ -1954,7 +2263,7 @@ def render_model_insights():
 
     left, right = st.columns([1, 1.25], gap="large")
     with left:
-        panel("Acceptance gate (Section 9.1)")
+        panel("Acceptance gate")
         if gate is None:
             missing_output("model_acceptance_gate.csv")
         else:
@@ -1969,7 +2278,7 @@ def render_model_insights():
             show_table(h_rows)
     with right:
         comparison = notebook_output("candidate_model_test_comparison.csv")
-        panel("Candidate models on the test set (Section 8.1)")
+        panel("Candidate models on the test set")
         if comparison is None:
             missing_output("candidate_model_test_comparison.csv")
         else:
@@ -2009,7 +2318,7 @@ def render_model_insights():
     matrices = notebook_output("confusion_matrices_all_models.csv")
     left, right = st.columns(2, gap="large")
     with left:
-        panel("Trade-off: missed severe collisions vs false alarms (Section 8.3)",
+        panel("Trade-off: missed severe collisions vs false alarms",
               "Lower-left is better. Models that rarely raise false alarms miss most Serious and Fatal collisions.")
         if summary is None:
             missing_output("confusion_matrix_summary_all_models.csv")
@@ -2060,7 +2369,7 @@ def render_model_insights():
 
     diagnostics = notebook_output("class_level_diagnostics_all_models.csv")
     if diagnostics is not None:
-        with st.expander("Class-level precision, recall and F1 for every model (Section 8.2)"):
+        with st.expander("Class-level precision, recall and F1 for every model"):
             view = diagnostics.copy()
             for column in ["Precision", "Recall", "Miss rate"]:
                 view[column] = view[column].map(pct)
@@ -2071,7 +2380,7 @@ def render_model_insights():
     management = notebook_output("management_interpretation_matrix.csv")
     left, right = st.columns([1.25, 1], gap="large")
     with left:
-        panel("Permutation importance of the selected model (Section 8.4)",
+        panel("Permutation importance of the selected model",
               "Drop in test Macro-F1 when a predictor is shuffled (15,000 test records, three repeats). "
               "Whiskers = ± one standard deviation; grey bars are within their own variation.")
         if importance is None:
@@ -2097,7 +2406,7 @@ def render_model_insights():
                 x="Low:Q", x2="High:Q", y=alt.Y("Predictor:N", sort=order))
             show_chart(alt.layer(bars, whiskers), height=max(420, 20 * len(data) + 80))
     with right:
-        panel("Management interpretation matrix (Section 8.4A)")
+        panel("Management interpretation matrix")
         if management is None:
             missing_output("management_interpretation_matrix.csv")
         else:
@@ -2107,7 +2416,7 @@ def render_model_insights():
             show_table(view)
             st.caption("Predictive reliance is not evidence that a feature caused severity.")
 
-        panel("Latest-year robustness: train 2021–2024, test 2025 (Section 8.6)")
+        panel("Latest-year robustness: train 2021–2024, test 2025")
         holdout = notebook_output("temporal_holdout_metrics.csv")
         if holdout is None or final is None:
             missing_output("temporal_holdout_metrics.csv")
@@ -2125,7 +2434,7 @@ def render_model_insights():
             st.caption(f"Trained on {int(h['Training records']):,} earlier collisions and tested on "
                        f"{int(h['Test records']):,} from {int(h['Test year'])}: performance stayed close to the random split.")
 
-    with st.expander("Missed severe collisions: where the model fails (Sections 8.5–8.5A)"):
+    with st.expander("Missed severe collisions: where the model fails"):
         numeric_profile = notebook_output("severe_error_numeric_profile.csv")
         if numeric_profile is not None:
             view = numeric_profile.copy()
