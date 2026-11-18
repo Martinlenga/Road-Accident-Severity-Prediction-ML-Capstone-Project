@@ -299,10 +299,10 @@ def label_codes(series: pd.Series, field: str, unknown: str = "Unknown") -> pd.S
 
 INK = "#EAF1FA"
 MUTED = "#9AAAC0"
-BG = "#10151D"
-PANEL = "#1A222D"
-PANEL_ALT = "#222D3A"
-BORDER = "#354252"
+BG = "#1E2733"
+PANEL = "#263241"
+PANEL_ALT = "#2E3B4C"
+BORDER = "#425166"
 BLUE = "#66A6FF"
 TEAL = "#35C6A5"
 AMBER = "#F4B860"
@@ -336,7 +336,7 @@ st.markdown(
       color: {INK} !important;
     }}
     .stApp {{ background: {BG} !important; }}
-    [data-testid="stHeader"] {{ background: rgba(8,19,33,.92) !important; }}
+    [data-testid="stHeader"] {{ background: rgba(30,39,51,.92) !important; }}
     [data-testid="stToolbar"] {{ right: 1rem; }}
     .block-container {{ max-width: 1600px; padding-top: 1.35rem; padding-bottom: 3rem; }}
     h1,h2,h3,h4,h5,p,li,label {{ color: {INK}; }}
@@ -345,7 +345,7 @@ st.markdown(
     h2 {{ font-size: 1.55rem !important; }}
     h3 {{ font-size: 1.12rem !important; }}
     p, .stMarkdown, [data-testid="stCaptionContainer"] {{ color: {MUTED}; }}
-    [data-testid="stSidebar"] {{ background: linear-gradient(180deg,#151F2B 0%,#111923 100%) !important; border-right: 1px solid {BORDER}; }}
+    [data-testid="stSidebar"] {{ background: linear-gradient(180deg,#243040 0%,#1E2733 100%) !important; border-right: 1px solid {BORDER}; }}
     [data-testid="stSidebar"] [data-testid="stVerticalBlock"] {{ gap: .72rem; }}
     [data-testid="stSidebar"] [data-testid="stRadio"] label {{ padding: 8px 10px; border-radius: 9px; }}
     [data-testid="stSidebar"] [data-testid="stRadio"] label:hover {{ background: rgba(99,199,216,.10); }}
